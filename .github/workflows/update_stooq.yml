@@ -1,0 +1,28 @@
+name: Stooq BET Adatfrissites
+
+on:
+  schedule:
+    # Hétfőtől péntekig, tőzsdei nyitvatartás alatt (UTC 8:00 - 16:00 között) 15 percenként lefut
+    - cron: '*/15 8-16 * * 1-5'
+  workflow_dispatch: # Kézzel is bármikor elindítható a GitHub felületén
+
+permissions:
+  contents: write
+
+jobs:
+  fetch-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repo letoltese
+        uses: actions/checkout@v4
+
+      - name: Stooq BET es Mid-Cap adatok lekerese
+        run: |
+          curl -s "https://stooq.com/q/l/?s=^bux+otp.hu+mol.hu+richt.hu+mtel.hu+opus.hu+4ig.hu+autowallis.hu+alteo.hu+waberers.hu+any.hu+masterplast.hu+pannergy.hu+graphisoft.hu+cigpannonia.hu+appeninn.hu+duna.hu+raba.hu+zwack.hu&f=sd2t2ohlcvn&h&e=csv" -o bet_data.csv
+
+      - name: Adatok mentese a repoba
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add bet_data.csv
+          git diff --staged --quiet || (git commit -m "Auto-update BET data" && git push)
