@@ -28,9 +28,9 @@ jobs:
       - name: Repo letoltese
         uses: actions/checkout@v4
 
-      - name: Stooq BET, Mid-Cap es Xtend adatok lekerese
+      - name: Stooq BET (BUX + 52 Reszveny + 20 Xtend) adatok lekerese
         run: |
-          curl -s "https://stooq.com/q/l/?s=^bux+otp.hu+mol.hu+richt.hu+mtel.hu+opus.hu+4ig.hu+autowallis.hu+alteo.hu+waberers.hu+any.hu+masterplast.hu+pannergy.hu+graphisoft.hu+cigpannonia.hu+appeninn.hu+duna.hu+raba.hu+zwack.hu+astrasun.hu+biggeorge.hu+cdsys.hu+chome.hu+coolklima.hu+deltakamatoz.hu+energyinvest.hu+epduferr.hu+glia.hu+gopd.hu+kermannit.hu+metmax.hu+multihome.hu+nap.hu+naturland.hu+navigator.hu+o3pnrs.hu+polyduct.hu+valberg.hu+vvt.hu&f=sd2t2ohlcvn&h&e=csv" -o bet_data.csv
+          curl -s "https://stooq.com/q/l/?s=^bux+4ig.hu+akko.hu+alteo.hu+amixa.hu+any.hu+appeninn.hu+autowallis.hu+bet.hu+bgreit.hu+bif.hu+cigpannonia.hu+civita.hu+delta.hu+dhgroup.hu+dmker.hu+enefi.hu+enefiels.hu+eproliusia.hu+esense.hu+finext.hu+finextb.hu+forrasoe.hu+forrast.hu+futuraqua.hu+gloster.hu+goodwillphrm.hu+granit.hu+gspark.hu+masterplast.hu+mbhbank.hu+mbhjb.hu+megakran.hu+mol.hu+mtel.hu+nordgeneral.hu+nutex.hu+opus.hu+ormester.hu+otp.hu+pannergy.hu+pensum.hu+raba.hu+richt.hu+splus.hu+strt.hu+sundell.hu+ubm.hu+uplaza.hu+vertikal.hu+vig.hu+waberers.hu+zwack.hu+astrasun.hu+biggeorge.hu+cdsys.hu+chome.hu+coolklima.hu+deltakamatoz.hu+energyinvest.hu+epduferr.hu+glia.hu+gopd.hu+kermannit.hu+metmax.hu+multihome.hu+nap.hu+naturland.hu+navigator.hu+o3pnrs.hu+polyduct.hu+valberg.hu+vvt.hu&f=sd2t2ohlcvn&h&e=csv" -o bet_data.csv
 
       - name: CSV mentese a repoba (ha valtozott)
         run: |
