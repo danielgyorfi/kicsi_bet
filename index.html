@@ -76,9 +76,9 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="text-lg font-bold tracking-tight text-white">BÉT Monitor</h1>
-                        <span class="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">Stooq CSV • GitHub Pages</span>
+                        <span class="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">Stooq CSV • v6</span>
                     </div>
-                    <p class="text-xs text-slate-400">Blue-Chip, Mid-Cap & Xtend (39 instrumentum) • Proxy-mentes terminál</p>
+                    <p class="text-xs text-slate-400">Teljes BÉT Paletta: Blue-Chip, Mid-Cap & Xtend (73 instrumentum) • GitHub Pages</p>
                 </div>
             </div>
 
@@ -116,21 +116,11 @@
                 </button>
 
                 <!-- Kézi frissítés -->
-                <button onclick="loadCsvData(true)" class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-blue-600 hover:bg-blue-500 text-white shadow-sm shadow-blue-900/40 transition">
-                    <i id="refresh-icon" data-lucide="refresh-cw" class="w-4 h-4"></i>
+                <button id="refresh-btn" onclick="loadCsvData(true)" class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-blue-600 hover:bg-blue-500 text-white shadow-sm shadow-blue-900/40 transition">
+                    <span id="refresh-icon-wrapper" class="inline-flex items-center justify-center">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                    </span>
                     <span>Frissítés most</span>
-                </button>
-
-                <!-- CSV & GitHub Beállítások / Teszt -->
-                <button onclick="openModal('csv-settings-modal')" class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 transition">
-                    <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
-                    <span>CSV & GitHub Beállítások</span>
-                </button>
-
-                <!-- Letöltés index.html néven -->
-                <button onclick="downloadAsIndexHtml()" class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 transition" title="Letöltés index.html néven a GitHub repód gyökerébe">
-                    <i data-lucide="download" class="w-4 h-4"></i>
-                    <span class="hidden xl:inline">Letöltés index.html-ként</span>
                 </button>
             </div>
         </div>
@@ -178,9 +168,9 @@
                 <!-- Piaci Szélesség (Emelkedő / Csökkenő papírok aránya a CSV-ben) -->
                 <div class="lg:col-span-3 flex items-center justify-between lg:justify-end gap-3 border-t lg:border-t-0 lg:border-l border-slate-800 pt-3 lg:pt-0 lg:pl-4">
                     <div class="text-xs">
-                        <div class="text-slate-400 text-[11px] mb-1">BÉT Piaci Hangulat (38 részvény)</div>
+                        <div class="text-slate-400 text-[11px] mb-1">BÉT Piaci Hangulat (72 részvény)</div>
                         <div class="flex items-center gap-3 font-mono font-semibold">
-                            <span class="text-emerald-400 flex items-center gap-1" title="Nyitóár felett">
+                            <span class="text-emerald-400 flex items-center gap-1" title="Bázisár felett">
                                 <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
                                 <span id="market-breadth-up">0</span>
                             </span>
@@ -188,7 +178,7 @@
                                 <i data-lucide="minus" class="w-3.5 h-3.5"></i>
                                 <span id="market-breadth-flat">0</span>
                             </span>
-                            <span class="text-rose-400 flex items-center gap-1" title="Nyitóár alatt">
+                            <span class="text-rose-400 flex items-center gap-1" title="Bázisár alatt">
                                 <i data-lucide="trending-down" class="w-3.5 h-3.5"></i>
                                 <span id="market-breadth-down">0</span>
                             </span>
@@ -215,23 +205,26 @@
                 <!-- Szűrő Sáv: Kategóriák, Keresés, Rendezés és Nézetváltó -->
                 <div class="p-4 border-b border-slate-800 flex flex-col gap-3">
                     <div class="flex flex-wrap items-center justify-between gap-3">
-                        <!-- Kategória Fülek -->
+                        <!-- Kategória Fülek (Alapértelmezett: Kedvencek) -->
                         <div class="flex items-center gap-1.5 bg-slate-900 p-1 rounded-xl border border-slate-800 overflow-x-auto">
-                            <button onclick="setCategoryFilter('all')" id="cat-all" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow">
-                                Összes (39)
+                            <button onclick="setCategoryFilter('favorites')" id="cat-favorites" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow flex items-center gap-1">
+                                <span>★ Kedvencek</span>
+                                <span id="fav-count-badge" class="text-[10px] px-1.5 py-0.2 rounded bg-slate-950/60 text-amber-300 font-mono">4</span>
+                            </button>
+                            <button onclick="setCategoryFilter('all')" id="cat-all" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-medium transition text-slate-400 hover:text-white">
+                                Összes (73)
+                            </button>
+                            <button onclick="setCategoryFilter('regulated')" id="cat-regulated" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-medium transition text-slate-400 hover:text-white">
+                                Részvények (52)
                             </button>
                             <button onclick="setCategoryFilter('bluechip')" id="cat-bluechip" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-medium transition text-slate-400 hover:text-white">
                                 Blue-Chip (4)
                             </button>
                             <button onclick="setCategoryFilter('midcap')" id="cat-midcap" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-medium transition text-slate-400 hover:text-white">
-                                Mid-Cap (14)
+                                Mid-Cap (48)
                             </button>
                             <button onclick="setCategoryFilter('xtend')" id="cat-xtend" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-medium transition text-slate-400 hover:text-white">
                                 Xtend (20)
-                            </button>
-                            <button onclick="setCategoryFilter('favorites')" id="cat-favorites" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-medium transition text-slate-400 hover:text-white flex items-center gap-1">
-                                <span>★ Kedvencek</span>
-                                <span id="fav-count-badge" class="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-amber-400 font-mono">0</span>
                             </button>
                         </div>
 
@@ -252,7 +245,7 @@
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <div class="relative flex-1 min-w-[200px]">
                             <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-                            <input id="stock-search" type="text" oninput="renderStockList()" placeholder="Keresés ticker vagy név alapján (pl. OTP, ASTRASUN, NAP, O3PNRS)..." 
+                            <input id="stock-search" type="text" oninput="renderStockList()" placeholder="Keresés ticker vagy név alapján (pl. OTP, MBHBANK, GLOSTER, GSPARK, SPLUS, ASTRASUN)..." 
                                 class="w-full pl-9 pr-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
                         </div>
 
@@ -260,28 +253,29 @@
                             <label class="text-[11px] text-slate-400">Rendezés:</label>
                             <select id="stock-sort" onchange="renderStockList()" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
                                 <option value="default">Alapértelmezett (BÉT sorrend)</option>
-                                <option value="change_desc">Napi változás % (Legjobb elöl)</option>
-                                <option value="change_asc">Napi változás % (Leggyengébb elöl)</option>
-                                <option value="volume_desc">Forgalom (Legnagyobb elöl)</option>
-                                <option value="price_desc">Árfolyam (Csökkenő)</option>
-                                <option value="symbol_asc">Ticker (A–Z)</option>
+                                <option value="symbol_asc">Név / Ticker (A–Z)</option>
+                                <option value="change_desc">Változás % (Legjobb elöl)</option>
+                                <option value="change_asc">Változás % (Leggyengébb elöl)</option>
+                                <option value="value_desc">Forgalom érték (Legnagyobb elöl)</option>
+                                <option value="volume_desc">Forgalom db (Legnagyobb elöl)</option>
+                                <option value="price_desc">Utolsó ár (Csökkenő)</option>
                             </select>
                         </div>
                     </div>
                 </div>
 
                 <!-- TÁBLÁZAT NÉZET -->
-                <div id="stock-table-container" class="overflow-x-auto">
+                <div id="stock-table-container" class="overflow-x-auto max-h-[720px]">
                     <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="border-b border-slate-800/80 text-[11px] font-semibold uppercase tracking-wider text-slate-400 bg-slate-900/50">
+                        <thead class="sticky top-0 z-10 bg-slate-900/95 backdrop-blur">
+                            <tr class="border-b border-slate-800/80 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                                 <th class="py-3 pl-3 pr-1 w-8 text-center">★</th>
-                                <th class="py-3 px-2">Ticker / Vállalat</th>
+                                <th class="py-3 px-2">Név / Idő</th>
                                 <th class="py-3 px-2 text-right">Utolsó Ár (Deviza)</th>
-                                <th class="py-3 px-2 text-right">Napi Vált. (Nyitótól)</th>
-                                <th class="py-3 px-3 text-center hidden md:table-cell">Napi Min – Max Tartomány</th>
-                                <th class="py-3 px-2 text-right hidden sm:table-cell">Forgalom (db)</th>
-                                <th class="py-3 pl-2 pr-4 text-right hidden xl:table-cell">Dátum / Idő</th>
+                                <th class="py-3 px-2 text-right">Változás (árf. / %)</th>
+                                <th class="py-3 px-2 text-right hidden md:table-cell">Nyitó / Bázisár</th>
+                                <th class="py-3 px-3 text-center hidden lg:table-cell">Napi Min – Max</th>
+                                <th class="py-3 pl-2 pr-4 text-right hidden sm:table-cell">Forgalom (érték / db)</th>
                             </tr>
                         </thead>
                         <tbody id="stock-table-body" class="divide-y divide-slate-800/60 text-sm">
@@ -303,7 +297,7 @@
                         <span>Forrás: <code id="footer-csv-path" class="text-emerald-400">./bet_data.csv</code></span>
                     </div>
                     <div>
-                        <span>Napi változás számítása: <strong class="text-slate-300">(Close − Open) / Open</strong></span>
+                        <span>EUR/HUF kalkulált árfolyam: <strong id="footer-eur-rate" class="text-amber-300 font-mono">408 Ft</strong></span>
                     </div>
                 </div>
             </div>
@@ -477,15 +471,15 @@
                         <div id="stat-open" class="font-mono text-xs font-bold text-white mt-0.5">--</div>
                     </div>
                     <div class="bg-slate-900/70 border border-slate-800/90 p-2.5 rounded-xl">
-                        <div class="text-[10px] uppercase text-slate-400">Utolsó (Close)</div>
-                        <div id="stat-close" class="font-mono text-xs font-bold text-white mt-0.5">--</div>
+                        <div class="text-[10px] uppercase text-slate-400">Bázisár (Előző záró)</div>
+                        <div id="stat-base" class="font-mono text-xs font-bold text-blue-300 mt-0.5">--</div>
                     </div>
                     <div class="bg-slate-900/70 border border-slate-800/90 p-2.5 rounded-xl">
                         <div class="text-[10px] uppercase text-slate-400">Forgalom (db)</div>
                         <div id="stat-volume" class="font-mono text-xs font-bold text-white mt-0.5">--</div>
                     </div>
                     <div class="bg-slate-900/70 border border-slate-800/90 p-2.5 rounded-xl">
-                        <div class="text-[10px] uppercase text-slate-400">Becsült Forg. (M Ft)</div>
+                        <div class="text-[10px] uppercase text-slate-400">Forgalom Érték</div>
                         <div id="stat-turnover" class="font-mono text-xs font-bold text-emerald-400 mt-0.5">--</div>
                     </div>
                 </div>
@@ -505,42 +499,16 @@
                         <div>
                             <label id="calc-budget-label" class="block text-[10px] text-slate-400 mb-1">Befektetendő összeg (HUF)</label>
                             <input id="calc-budget" type="number" value="500000" step="1000" oninput="updatePositionCalculator()"
-                                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-blue-500">
-                        </div>
-                        <div class="bg-slate-950/80 border border-slate-800 rounded-lg p-2 text-right">
-                            <div class="text-[10px] text-slate-400">Vásárolható darabszám:</div>
-                            <div id="calc-shares-result" class="font-mono text-sm font-bold text-emerald-400">-- db</div>
-                            <div id="calc-exact-cost" class="font-mono text-[10px] text-slate-400">Pontosan: -- Ft</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Külső Stooq & BÉT Hivatkozások -->
-                <div class="pt-2 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs">
-                    <span class="text-slate-400">Közvetlen Stooq & BÉT adatlapok:</span>
-                    <div class="flex items-center gap-3">
-                        <a id="ext-link-stooq" href="https://stooq.com/q/?s=otp.hu" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300 flex items-center gap-1 font-medium">
-                            <span>Stooq.com</span>
-                            <i data-lucide="external-link" class="w-3 h-3"></i>
-                        </a>
-                        <a href="https://bet.hu/oldalak/adatletoltes" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300 flex items-center gap-1 font-medium">
-                            <span>BET.hu</span>
-                            <i data-lucide="external-link" class="w-3 h-3"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- BÉT 39 PAPÍR HŐTÉRKÉP (HEATMAP) -->
+            <!-- BÉT 73 PAPÍR HŐTÉRKÉP (HEATMAP) -->
             <div class="glass-card rounded-2xl p-4 shadow-xl">
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
                         <i data-lucide="layout-grid" class="w-4 h-4 text-emerald-400"></i>
-                        BÉT Hőtérkép (Mind a 39 CSV Instrumentum)
+                        BÉT Hőtérkép (Mind a 73 Instrumentum)
                     </h3>
-                    <span class="text-[11px] text-slate-400">Nyitóárhoz viszonyítva</span>
+                    <span class="text-[11px] text-slate-400">Napi % változás szerint</span>
                 </div>
-                <div id="heatmap-grid" class="grid grid-cols-3 sm:grid-cols-5 gap-1.5 max-h-[380px] overflow-y-auto pr-1">
+                <div id="heatmap-grid" class="grid grid-cols-3 sm:grid-cols-6 gap-1.5 max-h-[380px] overflow-y-auto pr-1">
                     <!-- JS tölti fel -->
                 </div>
             </div>
@@ -548,178 +516,220 @@
         </section>
     </main>
 
-    <!-- MODAL: CSV & GITHUB PAGES BEÁLLÍTÁSOK / TESZTELÉS -->
-    <div id="csv-settings-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-4">
-        <div class="glass-card max-w-2xl w-full rounded-2xl p-6 border border-slate-700 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
-                <h3 class="text-base font-bold text-white flex items-center gap-2">
-                    <i data-lucide="file-spreadsheet" class="w-5 h-5 text-amber-400"></i>
-                    Stooq CSV Adatforrás & GitHub Pages Beállítások
-                </h3>
-                <button onclick="closeModal('csv-settings-modal')" class="text-slate-400 hover:text-white">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
+    <!-- LÁBLÉC: REJTETT TECHNIKAI ESZKÖZÖK ÉS V6 VERZIÓ INFORMÁCIÓ -->
+    <footer class="max-w-[1600px] w-full mx-auto px-4 pt-2 pb-8 mt-auto flex flex-col gap-3">
+        
+        <!-- Alapból összecsukott technikai / fejlesztői eszközök -->
+        <details class="glass-card rounded-xl border border-slate-800/80 text-xs text-slate-400 overflow-hidden">
+            <summary class="px-4 py-2.5 cursor-pointer hover:text-slate-200 select-none flex items-center justify-between font-medium bg-slate-900/50">
+                <span class="flex items-center gap-2">
+                    <i data-lucide="wrench" class="w-3.5 h-3.5 text-slate-500"></i>
+                    <span>Technikai eszközök, EUR/HUF árfolyam, manuális CSV tesztelés és HTML letöltés (elrejtve)</span>
+                </span>
+                <span class="text-[11px] font-mono text-slate-500">Kattints a lenyitáshoz ▾</span>
+            </summary>
 
-            <div class="space-y-5 text-xs text-slate-300 leading-relaxed">
+            <div class="p-4 border-t border-slate-800/80 grid grid-cols-1 lg:grid-cols-3 gap-4 bg-slate-950/60">
                 
-                <!-- 1. CSV Útvonal Beállítása -->
-                <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800">
-                    <label class="block text-sm font-bold text-white mb-1">1. CSV Fájl Elérési Útja (GitHub Pages vagy Raw URL)</label>
-                    <p class="text-slate-400 mb-2">
-                        Ha ezt az oldalt <code class="text-emerald-300">index.html</code> néven feltöltöd a GitHub repódba a <code class="text-emerald-300">bet_data.csv</code> mellé, az alapértelmezett <code class="text-white">./bet_data.csv</code> automatikusan működni fog! Másik repóból való teszteléshez megadhatod a teljes <em>raw.githubusercontent.com</em> URL-t is.
-                    </p>
-                    <div class="flex gap-2">
-                        <input id="custom-csv-url" type="text" value="./bet_data.csv" placeholder="./bet_data.csv vagy https://raw.githubusercontent.com/..."
-                            class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-blue-500">
-                        <button onclick="saveCsvUrlAndReload()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold transition">
-                            Mentés & Betöltés
+                <!-- 1. CSV Útvonal, EUR/HUF & HTML Letöltés -->
+                <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between gap-3">
+                    <div class="flex flex-col gap-2.5">
+                        <div>
+                            <label class="block text-xs font-bold text-white mb-1">1. CSV Forrás Útvonal (GitHub Pages)</label>
+                            <div class="flex gap-2">
+                                <input id="custom-csv-url" type="text" value="./bet_data.csv" placeholder="./bet_data.csv"
+                                    class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-blue-500">
+                                <button onclick="saveCsvUrlAndReload()" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold transition">
+                                    Mentés
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-300 mb-1">EUR/HUF Árfolyam (GSPARK, SPLUS, UPLAZA, O3PNRS)</label>
+                            <div class="flex gap-2">
+                                <input id="custom-eur-rate" type="number" step="0.5" value="408"
+                                    class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1 text-xs font-mono text-amber-300 focus:outline-none focus:border-blue-500">
+                                <button onclick="saveEurRate()" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold transition">
+                                    Beállít
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pt-3 border-t border-slate-800 flex items-center justify-between">
+                        <span class="text-[11px] text-slate-400">Oldal mentése GitHub-ra:</span>
+                        <button onclick="downloadAsIndexHtml()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 transition">
+                            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                            <span>Letöltés index.html-ként</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- 2. Helyi CSV Fájl Feltöltése vagy Beillesztése azonnali teszthez -->
-                <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-3">
+                <!-- 2. Helyi CSV tallózás / beillesztés -->
+                <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col gap-2">
                     <div class="flex items-center justify-between">
-                        <strong class="text-sm text-emerald-300">2. Azonnali Teszt: Saját <code class="text-white">bet_data.csv</code> tallózása vagy beillesztése</strong>
-                        <label class="cursor-pointer px-3 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 font-medium transition flex items-center gap-1.5">
-                            <i data-lucide="upload" class="w-3.5 h-3.5"></i>
-                            <span>CSV Fájl Tallózása</span>
+                        <strong class="text-xs text-white">2. Manuális CSV Teszt (Offline)</strong>
+                        <label class="cursor-pointer px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[11px] transition flex items-center gap-1">
+                            <i data-lucide="upload" class="w-3 h-3"></i>
+                            <span>CSV Tallózása</span>
                             <input type="file" accept=".csv,.txt" onchange="handleCsvFileUpload(event)" class="hidden">
                         </label>
                     </div>
-                    <p class="text-slate-400">
-                        Másold be ide a GitHub-on lévő <code class="text-slate-200">bet_data.csv</code> tartalmát, vagy tallózd be a fájlt, hogy még feltöltés előtt élőben lásd az eredményt:
-                    </p>
-                    <textarea id="manual-csv-textarea" rows="5" placeholder="Symbol,Date,Time,Open,High,Low,Close,Volume,Name&#10;^BUX,2025-05-15,17:00:00,79100,79650,78950,79450,0,BUX..."
-                        class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 font-mono text-[11px] text-emerald-300 focus:outline-none focus:border-blue-500"></textarea>
-                    <div class="flex justify-end gap-2">
-                        <button onclick="applyManualCsvText()" class="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold transition">
-                            Beillesztett CSV Feldolgozása
+                    <textarea id="manual-csv-textarea" rows="3" placeholder="Symbol,Date,Time,Open,High,Low,Close,Volume,Name..."
+                        class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 font-mono text-[10px] text-emerald-300 focus:outline-none focus:border-blue-500"></textarea>
+                    <div class="flex justify-end">
+                        <button onclick="applyManualCsvText()" class="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-semibold transition">
+                            CSV Feldolgozása
                         </button>
                     </div>
                 </div>
 
-                <!-- 3. GitHub Actions Stooq curl parancs referencia -->
-                <div class="p-4 rounded-xl bg-slate-950 border border-slate-800">
-                    <div class="flex items-center justify-between mb-1.5">
-                        <strong class="text-xs text-slate-300">A támogatott Stooq CSV lekérő parancs (GitHub Actions – 39 instrumentum, Xtenddel):</strong>
-                        <button onclick="copyCurlCommand()" class="text-[11px] px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200">Másolás</button>
+                <!-- 3. GitHub Actions Stooq curl parancs -->
+                <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between gap-2">
+                    <div class="flex items-center justify-between">
+                        <strong class="text-xs text-white">3. GitHub Actions Stooq parancs (73 papír)</strong>
+                        <button onclick="copyCurlCommand()" class="text-[11px] px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200">Másolás</button>
                     </div>
-                    <code id="curl-cmd-text" class="block font-mono text-[11px] text-blue-300 break-all bg-slate-900 p-2.5 rounded-lg border border-slate-800">curl -s "https://stooq.com/q/l/?s=^bux+otp.hu+mol.hu+richt.hu+mtel.hu+opus.hu+4ig.hu+autowallis.hu+alteo.hu+waberers.hu+any.hu+masterplast.hu+pannergy.hu+graphisoft.hu+cigpannonia.hu+appeninn.hu+duna.hu+raba.hu+zwack.hu+astrasun.hu+biggeorge.hu+cdsys.hu+chome.hu+coolklima.hu+deltakamatoz.hu+energyinvest.hu+epduferr.hu+glia.hu+gopd.hu+kermannit.hu+metmax.hu+multihome.hu+nap.hu+naturland.hu+navigator.hu+o3pnrs.hu+polyduct.hu+valberg.hu+vvt.hu&f=sd2t2ohlcvn&h&e=csv" -o bet_data.csv</code>
+                    <code id="curl-cmd-text" class="block font-mono text-[10px] text-blue-300 break-all bg-slate-950 p-2 rounded-lg border border-slate-800 max-h-24 overflow-y-auto">curl -s "https://stooq.com/q/l/?s=^bux+4ig.hu+akko.hu+alteo.hu+amixa.hu+any.hu+appeninn.hu+autowallis.hu+bet.hu+bgreit.hu+bif.hu+cigpannonia.hu+civita.hu+delta.hu+dhgroup.hu+dmker.hu+enefi.hu+enefiels.hu+eproliusia.hu+esense.hu+finext.hu+finextb.hu+forrasoe.hu+forrast.hu+futuraqua.hu+gloster.hu+goodwillphrm.hu+granit.hu+gspark.hu+masterplast.hu+mbhbank.hu+mbhjb.hu+megakran.hu+mol.hu+mtel.hu+nordgeneral.hu+nutex.hu+opus.hu+ormester.hu+otp.hu+pannergy.hu+pensum.hu+raba.hu+richt.hu+splus.hu+strt.hu+sundell.hu+ubm.hu+uplaza.hu+vertikal.hu+vig.hu+waberers.hu+zwack.hu+astrasun.hu+biggeorge.hu+cdsys.hu+chome.hu+coolklima.hu+deltakamatoz.hu+energyinvest.hu+epduferr.hu+glia.hu+gopd.hu+kermannit.hu+metmax.hu+multihome.hu+nap.hu+naturland.hu+navigator.hu+o3pnrs.hu+polyduct.hu+valberg.hu+vvt.hu&f=sd2t2ohlcvn&h&e=csv" -o bet_data.csv</code>
                 </div>
 
             </div>
+        </details>
 
-            <div class="flex justify-end pt-4 mt-4 border-t border-slate-800">
-                <button onclick="closeModal('csv-settings-modal')" class="px-4 py-2 rounded-xl text-xs font-medium bg-slate-800 hover:bg-slate-700 text-white">Bezárás</button>
+        <!-- Verziószám és GitHub Pages Deploy Állapotsor -->
+        <div class="flex flex-wrap items-center justify-between gap-2 px-2 text-[11px] text-slate-500 font-mono">
+            <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-emerald-400 font-bold">Verzió: v6</span>
+                <span>•</span>
+                <span>BÉT Monitor & Portfólió Terminál (73 Instrumentum • Szabályozott Piac + Xtend)</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span>CSV szinkron: <strong id="footer-sync-time" class="text-slate-400">--:--:--</strong></span>
+                <span>•</span>
+                <span>Alapértelmezett nézet: <strong class="text-slate-400">★ Kedvencek</strong></span>
             </div>
         </div>
-    </div>
+    </footer>
 
     <!-- ALKALMAZÁS LOGIKA -->
     <script>
         /***********************************************************************
-         * 1. BÉT METAADATOK A 39 STOOQ INSTRUMENTUMHOZ (BUX + 4 BLUE + 14 MID + 20 XTEND)
+         * 1. BÉT METAADATOK A 73 INSTRUMENTUMHOZ (BUX + 52 SZABÁLYOZOTT + 20 XTEND)
          ***********************************************************************/
-        const EUR_HUF_RATE = 408; // Becsült EUR/HUF árfolyam az O3PNRS.HU portfólió összesítéséhez
+        let EUR_HUF_RATE = 408; // Konfigurálható EUR/HUF árfolyam (GSPARK, SPLUS, UPLAZA, O3PNRS)
 
-        const BET_METADATA = {
-            // BUX Index
-            '^BUX':          { name: 'BUX Index', category: 'index', sector: 'Hivatalos BÉT Index', currency: 'pont', isIndex: true, order: 0, fallbackPrice: 88650.25, fallbackOpen: 87920.40, fallbackDate: '2026-11-13' },
-            // 4 Blue-Chip
-            'OTP.HU':        { name: 'OTP Bank Nyrt.', category: 'bluechip', sector: 'Pénzügy / Bank', currency: 'HUF', order: 1, fallbackPrice: 25040, fallbackOpen: 24650, fallbackDate: '2026-11-13' },
-            'MOL.HU':        { name: 'MOL Magyar Olaj- és Gázipari Nyrt.', category: 'bluechip', sector: 'Olaj és Gáz', currency: 'HUF', order: 2, fallbackPrice: 2914, fallbackOpen: 2890, fallbackDate: '2026-11-13' },
-            'RICHT.HU':      { name: 'Richter Gedeon Nyrt.', category: 'bluechip', sector: 'Gyógyszeripar', currency: 'HUF', order: 3, fallbackPrice: 10910, fallbackOpen: 10820, fallbackDate: '2026-11-13' },
-            'MTEL.HU':       { name: 'Magyar Telekom Nyrt.', category: 'bluechip', sector: 'Telekommunikáció', currency: 'HUF', order: 4, fallbackPrice: 1566, fallbackOpen: 1540, fallbackDate: '2026-11-13' },
-            // 14 Mid-Cap
-            'OPUS.HU':       { name: 'OPUS GLOBAL Nyrt.', category: 'midcap', sector: 'Ipari & Befektetési Holding', currency: 'HUF', order: 5, fallbackPrice: 538, fallbackOpen: 526, fallbackDate: '2026-11-13' },
-            '4IG.HU':        { name: '4iG Nyrt.', category: 'midcap', sector: 'IT & Telekommunikáció', currency: 'HUF', order: 6, fallbackPrice: 1430, fallbackOpen: 1410, fallbackDate: '2026-11-13' },
-            'AUTOWALLIS.HU': { name: 'AutoWallis Nyrt.', category: 'midcap', sector: 'Autókereskedelem & Mobilitás', currency: 'HUF', order: 7, fallbackPrice: 167.5, fallbackOpen: 164, fallbackDate: '2026-11-13', decimals: 1 },
-            'ALTEO.HU':      { name: 'ALTEO Energiaszolgáltató Nyrt.', category: 'midcap', sector: 'Megújuló Energetika', currency: 'HUF', order: 8, fallbackPrice: 4890, fallbackOpen: 4820, fallbackDate: '2026-11-13' },
-            'WABERERS.HU':   { name: "Waberer's International Nyrt.", category: 'midcap', sector: 'Logisztika & Fuvarozás', currency: 'HUF', order: 9, fallbackPrice: 4300, fallbackOpen: 4260, fallbackDate: '2026-11-13' },
-            'ANY.HU':        { name: 'ANY Biztonsági Nyomda Nyrt.', category: 'midcap', sector: 'Nyomdaipar & Biztonságtechnika', currency: 'HUF', order: 10, fallbackPrice: 5060, fallbackOpen: 4980, fallbackDate: '2026-11-13' },
-            'MASTERPLAST.HU':{ name: 'Masterplast Nyrt.', category: 'midcap', sector: 'Építőanyag-ipar', currency: 'HUF', order: 11, fallbackPrice: 2610, fallbackOpen: 2640, fallbackDate: '2026-11-13' },
-            'PANNERGY.HU':   { name: 'PannErgy Nyrt.', category: 'midcap', sector: 'Geotermikus Energia', currency: 'HUF', order: 12, fallbackPrice: 1605, fallbackOpen: 1590, fallbackDate: '2026-11-13' },
-            'GRAPHISOFT.HU': { name: 'Graphisoft Park SE', category: 'midcap', sector: 'Ingatlanfejlesztés', currency: 'HUF', order: 13, fallbackPrice: 4160, fallbackOpen: 4120, fallbackDate: '2026-11-13' },
-            'CIGPANNONIA.HU':{ name: 'CIG Pannónia Életbiztosító Nyrt.', category: 'midcap', sector: 'Biztosítás', currency: 'HUF', order: 14, fallbackPrice: 370, fallbackOpen: 372, fallbackDate: '2026-11-13' },
-            'APPENINN.HU':   { name: 'Appeninn Holding Nyrt.', category: 'midcap', sector: 'Ingatlanbefektetés', currency: 'HUF', order: 15, fallbackPrice: 812, fallbackOpen: 795, fallbackDate: '2026-11-13' },
-            'DUNA.HU':       { name: 'Duna House Holding Nyrt.', category: 'midcap', sector: 'Ingatlanközvetítés & Pénzügy', currency: 'HUF', order: 16, fallbackPrice: 990, fallbackOpen: 980, fallbackDate: '2026-11-13' },
-            'RABA.HU':       { name: 'RÁBA Járműipari Holding Nyrt.', category: 'midcap', sector: 'Járműipar & Gépgyártás', currency: 'HUF', order: 17, fallbackPrice: 1435, fallbackOpen: 1445, fallbackDate: '2026-11-13' },
-            'ZWACK.HU':      { name: 'Zwack Unicum Nyrt.', category: 'midcap', sector: 'Élelmiszer- és Italgyártás', currency: 'HUF', order: 18, fallbackPrice: 27000, fallbackOpen: 26800, fallbackDate: '2026-11-13' },
-            // 20 BÉT Xtend Részvény (a beküldött BÉT Xtend lista alapján)
-            'ASTRASUN.HU':     { name: 'Astrasun Solar Nyrt.', category: 'xtend', sector: 'BÉT Xtend • Napenergia', currency: 'HUF', order: 19, fallbackPrice: 220, fallbackOpen: 210, fallbackDate: '2026-11-13', decimals: 0 },
-            'BIGGEORGE.HU':    { name: 'Biggeorge Property Nyrt.', category: 'xtend', sector: 'BÉT Xtend • Ingatlan', currency: 'HUF', order: 20, fallbackPrice: 801, fallbackOpen: 801, fallbackDate: '2022-09-05', decimals: 0 },
-            'CDSYS.HU':        { name: 'CDSYS Nyrt.', category: 'xtend', sector: 'BÉT Xtend • IT Szolgáltatás', currency: 'HUF', order: 21, fallbackPrice: 167000, fallbackOpen: 167000, fallbackDate: '2022-12-29', decimals: 0 },
-            'CHOME.HU':        { name: 'C-Home Nyrt.', category: 'xtend', sector: 'BÉT Xtend • Ingatlan', currency: 'HUF', order: 22, fallbackPrice: 22, fallbackOpen: 22, fallbackDate: '2026-11-06', decimals: 0 },
-            'COOLKLIMA.HU':    { name: 'Cool Klíma Nyrt.', category: 'xtend', sector: 'BÉT Xtend • Épületgépészet', currency: 'HUF', order: 23, fallbackPrice: 1294, fallbackOpen: 1294, fallbackDate: '2025-12-17', decimals: 0 },
-            'DELTAKAMATOZ.HU': { name: 'Delta Kamatozó Részvény', category: 'xtend', sector: 'BÉT Xtend • Technológia', currency: 'HUF', order: 24, fallbackPrice: 833333, fallbackOpen: 833333, fallbackDate: '2024-03-06', decimals: 0 },
-            'ENERGYINVEST.HU': { name: 'Energy Investment Nyrt.', category: 'xtend', sector: 'BÉT Xtend • Energetika', currency: 'HUF', order: 25, fallbackPrice: 382, fallbackOpen: 382, fallbackDate: '2022-12-29', decimals: 0 },
-            'EPDUFERR.HU':     { name: 'Épduferr Nyrt.', category: 'xtend', sector: 'BÉT Xtend • Építőipar', currency: 'HUF', order: 26, fallbackPrice: 7.18, fallbackOpen: 7.20, fallbackDate: '2026-11-13', decimals: 2 },
-            'GLIA.HU':         { name: 'Glia Nyrt.', category: 'xtend', sector: 'BÉT Xtend • K+F / Agrár', currency: 'HUF', order: 27, fallbackPrice: 50, fallbackOpen: 48, fallbackDate: '2026-11-13', decimals: 0 },
-            'GOPD.HU':         { name: 'GOPD Nyrt.', category: 'xtend', sector: 'BÉT Xtend • Ingatlan', currency: 'HUF', order: 28, fallbackPrice: 7750, fallbackOpen: 7750, fallbackDate: '2026-06-26', decimals: 0 },
-            'KERMANNIT.HU':    { name: 'Kermann IT Solutions Nyrt.', category: 'xtend', sector: 'BÉT Xtend • IT & Távközlés', currency: 'HUF', order: 29, fallbackPrice: 5.55, fallbackOpen: 6.00, fallbackDate: '2026-11-13', decimals: 2 },
-            'METMAX.HU':       { name: 'MetMax Europe Nyrt.', category: 'xtend', sector: 'BÉT Xtend • Gépgyártás', currency: 'HUF', order: 30, fallbackPrice: 509, fallbackOpen: 509, fallbackDate: '2025-12-01', decimals: 0 },
-            'MULTIHOME.HU':    { name: 'MultiHome Nyrt.', category: 'xtend', sector: 'BÉT Xtend • Ingatlan', currency: 'HUF', order: 31, fallbackPrice: 1.38, fallbackOpen: 1.38, fallbackDate: '2026-11-11', decimals: 2 },
-            'NAP.HU':          { name: 'NAP Nyrt.', category: 'xtend', sector: 'BÉT Xtend • Napenergia', currency: 'HUF', order: 32, fallbackPrice: 1400, fallbackOpen: 1380, fallbackDate: '2026-11-13', decimals: 0 },
-            'NATURLAND.HU':    { name: 'Naturland Magyarország Nyrt.', category: 'xtend', sector: 'BÉT Xtend • Egészségipar', currency: 'HUF', order: 33, fallbackPrice: 1830, fallbackOpen: 1830, fallbackDate: '2026-11-10', decimals: 0 },
-            'NAVIGATOR.HU':    { name: 'Navigator Investments Nyrt.', category: 'xtend', sector: 'BÉT Xtend • Ipari Befektetés', currency: 'HUF', order: 34, fallbackPrice: 105, fallbackOpen: 100, fallbackDate: '2026-11-13', decimals: 0 },
-            'O3PNRS.HU':       { name: 'OXO Technologies Holding (O3PNRS)', category: 'xtend', sector: 'BÉT Xtend • Tech Holding (EUR)', currency: 'EUR', order: 35, fallbackPrice: 9.1, fallbackOpen: 9.1, fallbackDate: '2026-11-13', decimals: 1 },
-            'POLYDUCT.HU':     { name: 'Polyduct Nyrt.', category: 'xtend', sector: 'BÉT Xtend • Műanyagipar', currency: 'HUF', order: 36, fallbackPrice: 10000, fallbackOpen: 10000, fallbackDate: '2026-11-09', decimals: 0 },
-            'VALBERG.HU':      { name: 'Valberg Nyrt.', category: 'xtend', sector: 'BÉT Xtend • Ingatlan', currency: 'HUF', order: 37, fallbackPrice: 10, fallbackOpen: 10, fallbackDate: '2022-12-28', decimals: 0 },
-            'VVT.HU':          { name: 'Vertikál Group Nyrt. (VVT)', category: 'xtend', sector: 'BÉT Xtend • Környezetvédelem', currency: 'HUF', order: 38, fallbackPrice: 300, fallbackOpen: 300, fallbackDate: '2026-11-12', decimals: 0 }
+        // Alias szótár, hogy a Stooq és BÉT névváltozatok (pl. RICHT / RICHTER, MTEL / MTELEKOM, DUNA / DHGROUP) egyaránt működjenek
+        const SYMBOL_ALIASES = {
+            'RICHTER.HU': 'RICHT.HU',
+            'MTELEKOM.HU': 'MTEL.HU',
+            'DUNA.HU': 'DHGROUP.HU',
+            'GRAPHISOFT.HU': 'GSPARK.HU',
+            'ENEFI_ELS.HU': 'ENEFIELS.HU',
+            'FINEXT_B.HU': 'FINEXTB.HU',
+            'FORRAS/OE.HU': 'FORRASOE.HU',
+            'FORRAS/T.HU': 'FORRAST.HU',
+            'FORRAS_OE.HU': 'FORRASOE.HU',
+            'FORRAS_T.HU': 'FORRAST.HU'
         };
 
-        // Beépített minta CSV (mind a 39 instrumentummal, beleértve a 20 Xtend részvényt is)
-        const FALLBACK_SAMPLE_CSV = `Symbol,Date,Time,Open,High,Low,Close,Volume,Name
-^BUX,2026-11-13,17:00:15,87920.40,88840.10,87790.00,88650.25,0,BUX
-OTP.HU,2026-11-13,17:01:02,24650,25120,24580,25040,486250,OTP BANK
-MOL.HU,2026-11-13,17:00:54,2890,2924,2876,2914,612400,MOL
-RICHT.HU,2026-11-13,17:00:48,10820,10960,10780,10910,184320,RICHTER GEDEON
-MTEL.HU,2026-11-13,17:00:39,1540,1572,1534,1566,342100,MAGYAR TELEKOM
-OPUS.HU,2026-11-13,17:00:22,526,542,522,538,264000,OPUS GLOBAL
-4IG.HU,2026-11-13,17:00:19,1410,1445,1395,1430,118500,4IG
-AUTOWALLIS.HU,2026-11-13,17:00:31,164,168.5,163,167.5,195400,AUTOWALLIS
-ALTEO.HU,2026-11-13,17:00:12,4820,4910,4800,4890,22400,ALTEO
-WABERERS.HU,2026-11-13,16:59:45,4260,4320,4240,4300,16800,WABERERS INTERNATIONAL
-ANY.HU,2026-11-13,17:00:05,4980,5080,4960,5060,28900,ANY BIZTONSAGI NYOMDA
-MASTERPLAST.HU,2026-11-13,16:58:10,2640,2670,2590,2610,19200,MASTERPLAST
-PANNERGY.HU,2026-11-13,16:55:40,1590,1615,1580,1605,14300,PANNERGY
-GRAPHISOFT.HU,2026-11-13,16:52:18,4120,4180,4100,4160,6400,GRAPHISOFT PARK
-CIGPANNONIA.HU,2026-11-13,16:57:33,372,378,368,370,41200,CIG PANNONIA
-APPENINN.HU,2026-11-13,17:00:01,795,818,790,812,88500,APPENINN
-DUNA.HU,2026-11-13,16:50:11,980,995,974,990,11200,DUNA HOUSE
-RABA.HU,2026-11-13,16:48:29,1445,1460,1430,1435,9800,RABA
-ZWACK.HU,2026-11-13,16:40:00,26800,27100,26800,27000,850,ZWACK UNICUM
-ASTRASUN.HU,2026-11-13,16:45:00,210,222,210,220,14500,ASTRASUN SOLAR
-BIGGEORGE.HU,2022-09-05,17:00:00,801,801,801,801,0,BIGGEORGE
-CDSYS.HU,2022-12-29,17:00:00,167000,167000,167000,167000,0,CDSYS
-CHOME.HU,2026-11-06,17:00:00,22,22,22,22,1200,CHOME
-COOLKLIMA.HU,2025-12-17,17:00:00,1294,1294,1294,1294,0,COOL KLIMA
-DELTAKAMATOZ.HU,2024-03-06,17:00:00,833333,833333,833333,833333,0,DELTA KAMATOZO
-ENERGYINVEST.HU,2022-12-29,17:00:00,382,382,382,382,0,ENERGY INVESTMENT
-EPDUFERR.HU,2026-11-13,16:58:12,7.20,7.24,7.15,7.18,84200,EPDUFERR
-GLIA.HU,2026-11-13,16:40:00,48,50,48,50,6200,GLIA
-GOPD.HU,2026-06-26,17:00:00,7750,7750,7750,7750,0,GOPD
-KERMANNIT.HU,2026-11-13,16:55:20,6.00,6.00,5.50,5.55,39500,KERMANN IT
-METMAX.HU,2025-12-01,17:00:00,509,509,509,509,0,METMAX EUROPE
-MULTIHOME.HU,2026-11-11,17:00:00,1.38,1.38,1.38,1.38,15000,MULTIHOME
-NAP.HU,2026-11-13,16:51:10,1380,1410,1380,1400,8400,NAP NYRT
-NATURLAND.HU,2026-11-10,17:00:00,1830,1830,1830,1830,900,NATURLAND
-NAVIGATOR.HU,2026-11-13,16:49:00,100,106,100,105,19300,NAVIGATOR INVESTMENTS
-O3PNRS.HU,2026-11-13,16:30:00,9.1,9.1,9.1,9.1,450,O3 PARTNERS
-POLYDUCT.HU,2026-11-09,17:00:00,10000,10000,10000,10000,0,POLYDUCT
-VALBERG.HU,2022-12-28,17:00:00,10,10,10,10,0,VALBERG
-VVT.HU,2026-11-12,17:00:00,300,300,300,300,2100,VVT`;
+        const BET_METADATA = {
+            // 0. BUX Index
+            '^BUX':            { name: 'BUX Index', displayTicker: 'BUX', category: 'index', sector: 'Hivatalos BÉT Index', currency: 'pont', isIndex: true, order: 0, fallbackPrice: 88650.25, fallbackOpen: 87920.40, fallbackLow: 87790.00, fallbackHigh: 88840.10, fallbackBase: 87920.40, fallbackChange: 729.85, fallbackChgPct: 0.83, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2026-11-13', decimals: 2 },
+
+            // 1-4. Blue-Chip Részvények (4 db)
+            'OTP.HU':          { name: 'OTP Bank Nyrt.', displayTicker: 'OTP', category: 'bluechip', sector: 'Pénzügy / Bank', currency: 'HUF', order: 1, fallbackPrice: 41300, fallbackOpen: 42060, fallbackLow: 41290, fallbackHigh: 42060, fallbackBase: 41960, fallbackChange: -660, fallbackChgPct: -1.57, fallbackVal: 17930332830, fallbackVol: 432160, fallbackDate: '2026-11-13', decimals: 0 },
+            'MOL.HU':          { name: 'MOL Magyar Olaj- és Gázipari Nyrt.', displayTicker: 'MOL', category: 'bluechip', sector: 'Olaj és Gáz', currency: 'HUF', order: 2, fallbackPrice: 4980, fallbackOpen: 4858, fallbackLow: 4854, fallbackHigh: 5030, fallbackBase: 4822, fallbackChange: 158, fallbackChgPct: 3.28, fallbackVal: 4620358391, fallbackVol: 928932, fallbackDate: '2026-11-13', decimals: 0 },
+            'RICHT.HU':        { name: 'Richter Gedeon Nyrt.', displayTicker: 'RICHTER', category: 'bluechip', sector: 'Gyógyszeripar', currency: 'HUF', order: 3, fallbackPrice: 13540, fallbackOpen: 13530, fallbackLow: 13430, fallbackHigh: 13600, fallbackBase: 13590, fallbackChange: -50, fallbackChgPct: -0.37, fallbackVal: 4141642950, fallbackVol: 305936, fallbackDate: '2026-11-13', decimals: 0 },
+            'MTEL.HU':         { name: 'Magyar Telekom Nyrt.', displayTicker: 'MTELEKOM', category: 'bluechip', sector: 'Telekommunikáció', currency: 'HUF', order: 4, fallbackPrice: 3004, fallbackOpen: 2984, fallbackLow: 2964, fallbackHigh: 3012, fallbackBase: 2982, fallbackChange: 22, fallbackChgPct: 0.74, fallbackVal: 1620089004, fallbackVol: 540834, fallbackDate: '2026-11-13', decimals: 0 },
+
+            // 5-52. Szabályozott Piac Mid-Cap és Standard Részvények (48 db a képernyőkép ABC sorrendjében)
+            '4IG.HU':          { name: '4iG Nyrt.', displayTicker: '4IG', category: 'midcap', sector: 'IT & Telekommunikáció', currency: 'HUF', order: 5, fallbackPrice: 1362, fallbackOpen: 1361, fallbackLow: 1353, fallbackHigh: 1382, fallbackBase: 1363, fallbackChange: -1, fallbackChgPct: -0.07, fallbackVal: 30822861, fallbackVol: 22595, fallbackDate: '2026-11-13', decimals: 0 },
+            'AKKO.HU':         { name: 'AKKO Invest Nyrt.', displayTicker: 'AKKO', category: 'midcap', sector: 'Ingatlan & Vagyonkezelés', currency: 'HUF', order: 6, fallbackPrice: 219, fallbackOpen: 218, fallbackLow: 215, fallbackHigh: 219, fallbackBase: 220, fallbackChange: -1, fallbackChgPct: -0.45, fallbackVal: 2842928, fallbackVol: 13046, fallbackDate: '2026-11-13', decimals: 0 },
+            'ALTEO.HU':        { name: 'ALTEO Energiaszolgáltató Nyrt.', displayTicker: 'ALTEO', category: 'midcap', sector: 'Megújuló Energetika', currency: 'HUF', order: 7, fallbackPrice: 3420, fallbackOpen: 3430, fallbackLow: 3410, fallbackHigh: 3490, fallbackBase: 3420, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 4182160, fallbackVol: 1224, fallbackDate: '2026-11-13', decimals: 0 },
+            'AMIXA.HU':        { name: 'Amixa Holding Nyrt.', displayTicker: 'AMIXA', category: 'midcap', sector: 'Befektetési Holding', currency: 'HUF', order: 8, fallbackPrice: 190, fallbackOpen: 199, fallbackLow: 190, fallbackHigh: 199, fallbackBase: 194, fallbackChange: -4, fallbackChgPct: -2.06, fallbackVal: 251690, fallbackVol: 1310, fallbackDate: '2026-11-13', decimals: 0 },
+            'ANY.HU':          { name: 'ANY Biztonsági Nyomda Nyrt.', displayTicker: 'ANY', category: 'midcap', sector: 'Nyomdaipar & Biztonságtechnika', currency: 'HUF', order: 9, fallbackPrice: 5760, fallbackOpen: 5700, fallbackLow: 5680, fallbackHigh: 5800, fallbackBase: 5700, fallbackChange: 60, fallbackChgPct: 1.05, fallbackVal: 14750790, fallbackVol: 2570, fallbackDate: '2026-11-13', decimals: 0 },
+            'APPENINN.HU':     { name: 'Appeninn Holding Nyrt.', displayTicker: 'APPENINN', category: 'midcap', sector: 'Ingatlanbefektetés', currency: 'HUF', order: 10, fallbackPrice: 565, fallbackOpen: 564, fallbackLow: 561, fallbackHigh: 574, fallbackBase: 580, fallbackChange: -15, fallbackChgPct: -2.59, fallbackVal: 2640885, fallbackVol: 4674, fallbackDate: '2026-11-13', decimals: 0 },
+            'AUTOWALLIS.HU':   { name: 'AutoWallis Nyrt.', displayTicker: 'AUTOWALLIS', category: 'midcap', sector: 'Autókereskedelem & Mobilitás', currency: 'HUF', order: 11, fallbackPrice: 117, fallbackOpen: 119, fallbackLow: 117, fallbackHigh: 119, fallbackBase: 118, fallbackChange: -1, fallbackChgPct: -0.85, fallbackVal: 434923, fallbackVol: 3717, fallbackDate: '2026-11-13', decimals: 0 },
+            'BET.HU':          { name: 'Budapesti Értéktőzsde Nyrt.', displayTicker: 'BET', category: 'midcap', sector: 'Pénzügyi Szolgáltatás / Tőzsde', currency: 'HUF', order: 12, fallbackPrice: 10600, fallbackOpen: 10600, fallbackLow: 10600, fallbackHigh: 10600, fallbackBase: 10500, fallbackChange: 100, fallbackChgPct: 0.95, fallbackVal: 2554600, fallbackVol: 241, fallbackDate: '2026-11-13', decimals: 0 },
+            'BGREIT.HU':       { name: 'Biggeorge REIT Nyrt.', displayTicker: 'BGREIT', category: 'midcap', sector: 'Ingatlanbefektetés (REIT)', currency: 'HUF', order: 13, fallbackPrice: 933, fallbackOpen: 933, fallbackLow: 933, fallbackHigh: 933, fallbackBase: 933, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2023-11-22', decimals: 0 },
+            'BIF.HU':          { name: 'Budapesti Ingatlan Hasznosítási és Fejlesztési Nyrt.', displayTicker: 'BIF', category: 'midcap', sector: 'Ingatlanfejlesztés (REIT)', currency: 'HUF', order: 14, fallbackPrice: 199, fallbackOpen: 195, fallbackLow: 195, fallbackHigh: 199, fallbackBase: 195, fallbackChange: 4, fallbackChgPct: 2.05, fallbackVal: 15880, fallbackVol: 80, fallbackDate: '2026-11-13', decimals: 0 },
+            'CIGPANNONIA.HU':  { name: 'CIG Pannónia Életbiztosító Nyrt.', displayTicker: 'CIGPANNONIA', category: 'midcap', sector: 'Biztosítás', currency: 'HUF', order: 15, fallbackPrice: 300, fallbackOpen: 297, fallbackLow: 297, fallbackHigh: 305, fallbackBase: 292, fallbackChange: 8, fallbackChgPct: 2.74, fallbackVal: 25097270, fallbackVol: 83492, fallbackDate: '2026-11-13', decimals: 0 },
+            'CIVITA.HU':       { name: 'Civita Group Nyrt.', displayTicker: 'CIVITA', category: 'midcap', sector: 'Élelmiszeripar & Agrár', currency: 'HUF', order: 16, fallbackPrice: 191, fallbackOpen: 191, fallbackLow: 191, fallbackHigh: 191, fallbackBase: 191, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2026-11-11', decimals: 0 },
+            'DELTA.HU':        { name: 'Delta Technologies Nyrt.', displayTicker: 'DELTA', category: 'midcap', sector: 'IT & Rendszerintegráció', currency: 'HUF', order: 17, fallbackPrice: 36.8, fallbackOpen: 36.8, fallbackLow: 35.1, fallbackHigh: 37.5, fallbackBase: 36.95, fallbackChange: -0.15, fallbackChgPct: -0.41, fallbackVal: 4248053.25, fallbackVol: 117017, fallbackDate: '2026-11-13', decimals: 2 },
+            'DHGROUP.HU':      { name: 'Duna House Holding Nyrt. (DHGROUP)', displayTicker: 'DHGROUP', category: 'midcap', sector: 'Ingatlanközvetítés & Pénzügy', currency: 'HUF', order: 18, fallbackPrice: 1310, fallbackOpen: 1310, fallbackLow: 1305, fallbackHigh: 1310, fallbackBase: 1310, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 3607400, fallbackVol: 2755, fallbackDate: '2026-11-13', decimals: 0 },
+            'DMKER.HU':        { name: 'DM-KER Nyrt.', displayTicker: 'DMKER', category: 'midcap', sector: 'Mezőgazdasági és Építőipari Gépek', currency: 'HUF', order: 19, fallbackPrice: 29.6, fallbackOpen: 29.6, fallbackLow: 29.6, fallbackHigh: 29.6, fallbackBase: 29.6, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2026-11-11', decimals: 1 },
+            'ENEFI.HU':        { name: 'ENEFI Vagyonkezelő Nyrt.', displayTicker: 'ENEFI', category: 'midcap', sector: 'Vagyonkezelés & Energetika', currency: 'HUF', order: 20, fallbackPrice: 200, fallbackOpen: 195, fallbackLow: 195, fallbackHigh: 200, fallbackBase: 195, fallbackChange: 5, fallbackChgPct: 2.56, fallbackVal: 1981358, fallbackVol: 10000, fallbackDate: '2026-11-13', decimals: 0 },
+            'ENEFIELS.HU':     { name: 'ENEFI Elsőbbségi Részvény', displayTicker: 'ENEFI ELS', category: 'midcap', sector: 'Vagyonkezelés (Elsőbbségi)', currency: 'HUF', order: 21, fallbackPrice: 279, fallbackOpen: 279, fallbackLow: 279, fallbackHigh: 279, fallbackBase: 279, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2021-11-12', decimals: 0 },
+            'EPROLIUSIA.HU':   { name: 'Eproliusia Nyrt.', displayTicker: 'EPROLIUSIA', category: 'midcap', sector: 'Befektetési Társaság', currency: 'HUF', order: 22, fallbackPrice: 770, fallbackOpen: 770, fallbackLow: 770, fallbackHigh: 770, fallbackBase: 770, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2026-11-03', decimals: 0 },
+            'ESENSE.HU':       { name: 'eSense Nyrt.', displayTicker: 'ESENSE', category: 'midcap', sector: 'Üzleti Szolgáltatás / Call Center', currency: 'HUF', order: 23, fallbackPrice: 500, fallbackOpen: 500, fallbackLow: 500, fallbackHigh: 500, fallbackBase: 500, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2026-11-11', decimals: 0 },
+            'FINEXT.HU':       { name: 'Finext Nyrt.', displayTicker: 'FINEXT', category: 'midcap', sector: 'Vagyonkezelés', currency: 'HUF', order: 24, fallbackPrice: 1120, fallbackOpen: 1120, fallbackLow: 1120, fallbackHigh: 1120, fallbackBase: 1120, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2010-06-02', decimals: 0 },
+            'FINEXTB.HU':      { name: 'Finext B Részvény', displayTicker: 'FINEXT B', category: 'midcap', sector: 'Vagyonkezelés', currency: 'HUF', order: 25, fallbackPrice: 1085, fallbackOpen: 1085, fallbackLow: 1085, fallbackHigh: 1085, fallbackBase: 1085, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2018-09-25', decimals: 0 },
+            'FORRASOE.HU':     { name: 'Forrás Nyrt. OE (Osztalékelsőbbségi)', displayTicker: 'FORRAS/OE', category: 'midcap', sector: 'Vagyonkezelés & Megújuló Energia', currency: 'HUF', order: 26, fallbackPrice: 1450, fallbackOpen: 1450, fallbackLow: 1450, fallbackHigh: 1450, fallbackBase: 1450, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2026-11-05', decimals: 0 },
+            'FORRAST.HU':      { name: 'Forrás Nyrt. T (Törzsrészvény)', displayTicker: 'FORRAS/T', category: 'midcap', sector: 'Vagyonkezelés & Megújuló Energia', currency: 'HUF', order: 27, fallbackPrice: 1550, fallbackOpen: 1550, fallbackLow: 1550, fallbackHigh: 1550, fallbackBase: 1550, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2026-11-04', decimals: 0 },
+            'FUTURAQUA.HU':    { name: 'FuturAqua Ásványvíztermelő Nyrt.', displayTicker: 'FUTURAQUA', category: 'midcap', sector: 'Vízgazdálkodás & Élelmiszeripar', currency: 'HUF', order: 28, fallbackPrice: 6, fallbackOpen: 6, fallbackLow: 6, fallbackHigh: 6, fallbackBase: 6.8, fallbackChange: -0.8, fallbackChgPct: -11.76, fallbackVal: 33234, fallbackVol: 5539, fallbackDate: '2026-11-13', decimals: 1 },
+            'GLOSTER.HU':      { name: 'Gloster Infokommunikációs Nyrt.', displayTicker: 'GLOSTER', category: 'midcap', sector: 'IT & Felhőszolgáltatások', currency: 'HUF', order: 29, fallbackPrice: 505, fallbackOpen: 520, fallbackLow: 498, fallbackHigh: 520, fallbackBase: 510, fallbackChange: -5, fallbackChgPct: -0.98, fallbackVal: 72908740, fallbackVol: 145628, fallbackDate: '2026-11-13', decimals: 0 },
+            'GOODWILLPHRM.HU': { name: 'Goodwill Pharma Nyrt.', displayTicker: 'GOODWILLPHRM', category: 'midcap', sector: 'Gyógyszeripar & Étrend-kiegészítők', currency: 'HUF', order: 30, fallbackPrice: 470, fallbackOpen: 470, fallbackLow: 470, fallbackHigh: 470, fallbackBase: 500, fallbackChange: -30, fallbackChgPct: -6.00, fallbackVal: 188000, fallbackVol: 400, fallbackDate: '2026-11-13', decimals: 0 },
+            'GRANIT.HU':       { name: 'Gránit Bank Nyrt.', displayTicker: 'GRANIT', category: 'midcap', sector: 'Pénzügy / Digitális Bank', currency: 'HUF', order: 31, fallbackPrice: 8020, fallbackOpen: 8100, fallbackLow: 8000, fallbackHigh: 8200, fallbackBase: 8160, fallbackChange: -140, fallbackChgPct: -1.72, fallbackVal: 3168640, fallbackVol: 392, fallbackDate: '2026-11-13', decimals: 0 },
+            'GSPARK.HU':       { name: 'Graphisoft Park SE (EUR)', displayTicker: 'GSPARK', category: 'midcap', sector: 'Ingatlanfejlesztés (EUR)', currency: 'EUR', order: 32, fallbackPrice: 15, fallbackOpen: 15, fallbackLow: 15, fallbackHigh: 15, fallbackBase: 15.2, fallbackChange: -0.2, fallbackChgPct: -1.32, fallbackVal: 60, fallbackVol: 4, fallbackDate: '2026-11-13', decimals: 1 },
+            'MASTERPLAST.HU':  { name: 'Masterplast Nyrt.', displayTicker: 'MASTERPLAST', category: 'midcap', sector: 'Építőanyag-ipar', currency: 'HUF', order: 33, fallbackPrice: 2710, fallbackOpen: 2750, fallbackLow: 2710, fallbackHigh: 2750, fallbackBase: 2710, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 409530, fallbackVol: 151, fallbackDate: '2026-11-13', decimals: 0 },
+            'MBHBANK.HU':      { name: 'MBH Bank Nyrt.', displayTicker: 'MBHBANK', category: 'midcap', sector: 'Pénzügy / Bank', currency: 'HUF', order: 34, fallbackPrice: 2320, fallbackOpen: 2350, fallbackLow: 2310, fallbackHigh: 2360, fallbackBase: 2380, fallbackChange: -60, fallbackChgPct: -2.52, fallbackVal: 4601690, fallbackVol: 1961, fallbackDate: '2026-11-13', decimals: 0 },
+            'MBHJB.HU':        { name: 'MBH Jelzálogbank Nyrt.', displayTicker: 'MBHJB', category: 'midcap', sector: 'Pénzügy / Jelzálogbank', currency: 'HUF', order: 35, fallbackPrice: 383, fallbackOpen: 383, fallbackLow: 380, fallbackHigh: 383, fallbackBase: 396, fallbackChange: -13, fallbackChgPct: -3.28, fallbackVal: 1103080, fallbackVol: 2891, fallbackDate: '2026-11-13', decimals: 0 },
+            'MEGAKRAN.HU':     { name: 'Megakrán Nyrt.', displayTicker: 'MEGAKRAN', category: 'midcap', sector: 'Ipari Daruzás & Gépipar', currency: 'HUF', order: 36, fallbackPrice: 3.96, fallbackOpen: 4.06, fallbackLow: 3.96, fallbackHigh: 4.18, fallbackBase: 4.14, fallbackChange: -0.18, fallbackChgPct: -4.35, fallbackVal: 1026655.28, fallbackVol: 257770, fallbackDate: '2026-11-13', decimals: 2 },
+            'NORDGENERAL.HU':  { name: 'Nordgeneral Nyrt.', displayTicker: 'NORDGENERAL', category: 'midcap', sector: 'Ipari & Kereskedelmi Holding', currency: 'HUF', order: 37, fallbackPrice: 5.8, fallbackOpen: 5.8, fallbackLow: 5.8, fallbackHigh: 5.8, fallbackBase: 5.8, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2026-11-12', decimals: 1 },
+            'NUTEX.HU':        { name: 'Nutex Nyrt.', displayTicker: 'NUTEX', category: 'midcap', sector: 'Vagyonkezelés & Befektetés', currency: 'HUF', order: 38, fallbackPrice: 12.3, fallbackOpen: 12.3, fallbackLow: 12.3, fallbackHigh: 12.3, fallbackBase: 12.3, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 1230, fallbackVol: 100, fallbackDate: '2026-11-13', decimals: 1 },
+            'OPUS.HU':         { name: 'OPUS GLOBAL Nyrt.', displayTicker: 'OPUS', category: 'midcap', sector: 'Ipari & Befektetési Holding', currency: 'HUF', order: 39, fallbackPrice: 192, fallbackOpen: 195, fallbackLow: 187, fallbackHigh: 195, fallbackBase: 193, fallbackChange: -1, fallbackChgPct: -0.52, fallbackVal: 41689847.4, fallbackVol: 218639, fallbackDate: '2026-11-13', decimals: 0 },
+            'ORMESTER.HU':     { name: 'Őrmester Vagyonvédelmi Nyrt.', displayTicker: 'ORMESTER', category: 'midcap', sector: 'Biztonságtechnika & Vagyonvédelem', currency: 'HUF', order: 40, fallbackPrice: 390, fallbackOpen: 390, fallbackLow: 390, fallbackHigh: 390, fallbackBase: 390, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2026-11-10', decimals: 0 },
+            'PANNERGY.HU':     { name: 'PannErgy Nyrt.', displayTicker: 'PANNERGY', category: 'midcap', sector: 'Geotermikus Energia', currency: 'HUF', order: 41, fallbackPrice: 2660, fallbackOpen: 2700, fallbackLow: 2660, fallbackHigh: 2730, fallbackBase: 2700, fallbackChange: -40, fallbackChgPct: -1.48, fallbackVal: 13839080, fallbackVol: 5186, fallbackDate: '2026-11-13', decimals: 0 },
+            'PENSUM.HU':       { name: 'Pensum Group Nyrt.', displayTicker: 'PENSUM', category: 'midcap', sector: 'Humánerőforrás & Munkaerő-kölcsönzés', currency: 'HUF', order: 42, fallbackPrice: 1550, fallbackOpen: 1550, fallbackLow: 1550, fallbackHigh: 1550, fallbackBase: 1550, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2026-11-11', decimals: 0 },
+            'RABA.HU':         { name: 'RÁBA Járműipari Holding Nyrt.', displayTicker: 'RABA', category: 'midcap', sector: 'Járműipar & Gépgyártás', currency: 'HUF', order: 43, fallbackPrice: 3040, fallbackOpen: 3040, fallbackLow: 3010, fallbackHigh: 3050, fallbackBase: 3070, fallbackChange: -30, fallbackChgPct: -0.98, fallbackVal: 4843330, fallbackVol: 1592, fallbackDate: '2026-11-13', decimals: 0 },
+            'SPLUS.HU':        { name: 'Shopper Park Plus Nyrt. (EUR)', displayTicker: 'SPLUS', category: 'midcap', sector: 'Kereskedelmi Ingatlan (EUR)', currency: 'EUR', order: 44, fallbackPrice: 13.1, fallbackOpen: 13.2, fallbackLow: 13.1, fallbackHigh: 13.2, fallbackBase: 13.4, fallbackChange: -0.3, fallbackChgPct: -2.24, fallbackVal: 14546.2, fallbackVol: 1102, fallbackDate: '2026-11-13', decimals: 1 },
+            'STRT.HU':         { name: 'STRT Holding Nyrt.', displayTicker: 'STRT', category: 'midcap', sector: 'Kockázati Tőke & Befektetés', currency: 'HUF', order: 45, fallbackPrice: 820, fallbackOpen: 820, fallbackLow: 810, fallbackHigh: 820, fallbackBase: 820, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 395660, fallbackVol: 483, fallbackDate: '2026-11-13', decimals: 0 },
+            'SUNDELL.HU':      { name: 'Sundell Estate Nyrt.', displayTicker: 'SUNDELL', category: 'midcap', sector: 'Lakóingatlan-fejlesztés', currency: 'HUF', order: 46, fallbackPrice: 3200, fallbackOpen: 3200, fallbackLow: 3200, fallbackHigh: 3200, fallbackBase: 3200, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2026-11-12', decimals: 0 },
+            'UBM.HU':          { name: 'UBM Holding Nyrt.', displayTicker: 'UBM', category: 'midcap', sector: 'Agrárium & Takarmánygyártás', currency: 'HUF', order: 47, fallbackPrice: 1000, fallbackOpen: 1000, fallbackLow: 1000, fallbackHigh: 1000, fallbackBase: 870, fallbackChange: 130, fallbackChgPct: 14.94, fallbackVal: 100000, fallbackVol: 100, fallbackDate: '2026-11-13', decimals: 0 },
+            'UPLAZA.HU':       { name: 'Ultima Plaza Nyrt. (EUR)', displayTicker: 'UPLAZA', category: 'midcap', sector: 'Ingatlanhasznosítás (EUR)', currency: 'EUR', order: 48, fallbackPrice: 11, fallbackOpen: 11, fallbackLow: 11, fallbackHigh: 11, fallbackBase: 11, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 1980, fallbackVol: 180, fallbackDate: '2026-11-13', decimals: 0 },
+            'VERTIKAL.HU':     { name: 'Vertikál Group Nyrt.', displayTicker: 'VERTIKAL', category: 'midcap', sector: 'Környezetvédelem & Hulladékgazdálkodás', currency: 'HUF', order: 49, fallbackPrice: 7.58, fallbackOpen: 7.5, fallbackLow: 7.4, fallbackHigh: 7.6, fallbackBase: 7.76, fallbackChange: -0.18, fallbackChgPct: -2.32, fallbackVal: 1918919.98, fallbackVol: 254731, fallbackDate: '2026-11-13', decimals: 2 },
+            'VIG.HU':          { name: 'Vienna Insurance Group AG (VIG)', displayTicker: 'VIG', category: 'midcap', sector: 'Nemzetközi Biztosítás', currency: 'HUF', order: 50, fallbackPrice: 27900, fallbackOpen: 27900, fallbackLow: 27900, fallbackHigh: 27900, fallbackBase: 27900, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2026-11-11', decimals: 0 },
+            'WABERERS.HU':     { name: "Waberer's International Nyrt.", displayTicker: 'WABERERS', category: 'midcap', sector: 'Logisztika & Fuvarozás', currency: 'HUF', order: 51, fallbackPrice: 4080, fallbackOpen: 4100, fallbackLow: 4080, fallbackHigh: 4100, fallbackBase: 4150, fallbackChange: -70, fallbackChgPct: -1.69, fallbackVal: 8702400, fallbackVol: 2128, fallbackDate: '2026-11-13', decimals: 0 },
+            'ZWACK.HU':        { name: 'Zwack Unicum Nyrt.', displayTicker: 'ZWACK', category: 'midcap', sector: 'Élelmiszer- és Italgyártás', currency: 'HUF', order: 52, fallbackPrice: 31900, fallbackOpen: 32000, fallbackLow: 31500, fallbackHigh: 32000, fallbackBase: 32000, fallbackChange: -100, fallbackChgPct: -0.31, fallbackVal: 1340900, fallbackVol: 42, fallbackDate: '2026-11-13', decimals: 0 },
+
+            // 53-72. BÉT Xtend Részvények (20 db)
+            'ASTRASUN.HU':     { name: 'Astrasun Solar Nyrt.', displayTicker: 'ASTRASUN', category: 'xtend', sector: 'BÉT Xtend • Napenergia', currency: 'HUF', order: 53, fallbackPrice: 220, fallbackOpen: 210, fallbackLow: 210, fallbackHigh: 222, fallbackBase: 210, fallbackChange: 10, fallbackChgPct: 4.76, fallbackVal: 3190000, fallbackVol: 14500, fallbackDate: '2026-11-13', decimals: 0 },
+            'BIGGEORGE.HU':    { name: 'Biggeorge Property Nyrt.', displayTicker: 'BIGGEORGE', category: 'xtend', sector: 'BÉT Xtend • Ingatlan', currency: 'HUF', order: 54, fallbackPrice: 801, fallbackOpen: 801, fallbackLow: 801, fallbackHigh: 801, fallbackBase: 801, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2022-09-05', decimals: 0 },
+            'CDSYS.HU':        { name: 'CDSYS Nyrt.', displayTicker: 'CDSYS', category: 'xtend', sector: 'BÉT Xtend • IT Szolgáltatás', currency: 'HUF', order: 55, fallbackPrice: 167000, fallbackOpen: 167000, fallbackLow: 167000, fallbackHigh: 167000, fallbackBase: 167000, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2022-12-29', decimals: 0 },
+            'CHOME.HU':        { name: 'C-Home Nyrt.', displayTicker: 'CHOME', category: 'xtend', sector: 'BÉT Xtend • Ingatlan', currency: 'HUF', order: 56, fallbackPrice: 22, fallbackOpen: 22, fallbackLow: 22, fallbackHigh: 22, fallbackBase: 22, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 26400, fallbackVol: 1200, fallbackDate: '2026-11-06', decimals: 0 },
+            'COOLKLIMA.HU':    { name: 'Cool Klíma Nyrt.', displayTicker: 'COOLKLIMA', category: 'xtend', sector: 'BÉT Xtend • Épületgépészet', currency: 'HUF', order: 57, fallbackPrice: 1294, fallbackOpen: 1294, fallbackLow: 1294, fallbackHigh: 1294, fallbackBase: 1294, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2025-12-17', decimals: 0 },
+            'DELTAKAMATOZ.HU': { name: 'Delta Kamatozó Részvény', displayTicker: 'DELTAKAMATOZ', category: 'xtend', sector: 'BÉT Xtend • Technológia', currency: 'HUF', order: 58, fallbackPrice: 833333, fallbackOpen: 833333, fallbackLow: 833333, fallbackHigh: 833333, fallbackBase: 833333, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2024-03-06', decimals: 0 },
+            'ENERGYINVEST.HU': { name: 'Energy Investment Nyrt.', displayTicker: 'ENERGYINVEST', category: 'xtend', sector: 'BÉT Xtend • Energetika', currency: 'HUF', order: 59, fallbackPrice: 382, fallbackOpen: 382, fallbackLow: 382, fallbackHigh: 382, fallbackBase: 382, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2022-12-29', decimals: 0 },
+            'EPDUFERR.HU':     { name: 'Épduferr Nyrt.', displayTicker: 'EPDUFERR', category: 'xtend', sector: 'BÉT Xtend • Építőipar', currency: 'HUF', order: 60, fallbackPrice: 7.18, fallbackOpen: 7.20, fallbackLow: 7.15, fallbackHigh: 7.24, fallbackBase: 7.20, fallbackChange: -0.02, fallbackChgPct: -0.28, fallbackVal: 604556, fallbackVol: 84200, fallbackDate: '2026-11-13', decimals: 2 },
+            'GLIA.HU':         { name: 'Glia Nyrt.', displayTicker: 'GLIA', category: 'xtend', sector: 'BÉT Xtend • K+F / Agrár', currency: 'HUF', order: 61, fallbackPrice: 50, fallbackOpen: 48, fallbackLow: 48, fallbackHigh: 50, fallbackBase: 48, fallbackChange: 2, fallbackChgPct: 4.17, fallbackVal: 310000, fallbackVol: 6200, fallbackDate: '2026-11-13', decimals: 0 },
+            'GOPD.HU':         { name: 'GOPD Nyrt.', displayTicker: 'GOPD', category: 'xtend', sector: 'BÉT Xtend • Ingatlan', currency: 'HUF', order: 62, fallbackPrice: 7750, fallbackOpen: 7750, fallbackLow: 7750, fallbackHigh: 7750, fallbackBase: 7750, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2026-06-26', decimals: 0 },
+            'KERMANNIT.HU':    { name: 'Kermann IT Solutions Nyrt.', displayTicker: 'KERMANNIT', category: 'xtend', sector: 'BÉT Xtend • IT & Távközlés', currency: 'HUF', order: 63, fallbackPrice: 5.55, fallbackOpen: 6.00, fallbackLow: 5.50, fallbackHigh: 6.00, fallbackBase: 6.00, fallbackChange: -0.45, fallbackChgPct: -7.50, fallbackVal: 219225, fallbackVol: 39500, fallbackDate: '2026-11-13', decimals: 2 },
+            'METMAX.HU':       { name: 'MetMax Europe Nyrt.', displayTicker: 'METMAX', category: 'xtend', sector: 'BÉT Xtend • Gépgyártás', currency: 'HUF', order: 64, fallbackPrice: 509, fallbackOpen: 509, fallbackLow: 509, fallbackHigh: 509, fallbackBase: 509, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2025-12-01', decimals: 0 },
+            'MULTIHOME.HU':    { name: 'MultiHome Nyrt.', displayTicker: 'MULTIHOME', category: 'xtend', sector: 'BÉT Xtend • Ingatlan', currency: 'HUF', order: 65, fallbackPrice: 1.38, fallbackOpen: 1.38, fallbackLow: 1.38, fallbackHigh: 1.38, fallbackBase: 1.38, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 20700, fallbackVol: 15000, fallbackDate: '2026-11-11', decimals: 2 },
+            'NAP.HU':          { name: 'NAP Nyrt.', displayTicker: 'NAP', category: 'xtend', sector: 'BÉT Xtend • Napenergia', currency: 'HUF', order: 66, fallbackPrice: 1400, fallbackOpen: 1380, fallbackLow: 1380, fallbackHigh: 1410, fallbackBase: 1380, fallbackChange: 20, fallbackChgPct: 1.45, fallbackVal: 11760000, fallbackVol: 8400, fallbackDate: '2026-11-13', decimals: 0 },
+            'NATURLAND.HU':    { name: 'Naturland Magyarország Nyrt.', displayTicker: 'NATURLAND', category: 'xtend', sector: 'BÉT Xtend • Egészségipar', currency: 'HUF', order: 67, fallbackPrice: 1830, fallbackOpen: 1830, fallbackLow: 1830, fallbackHigh: 1830, fallbackBase: 1830, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 1647000, fallbackVol: 900, fallbackDate: '2026-11-10', decimals: 0 },
+            'NAVIGATOR.HU':    { name: 'Navigator Investments Nyrt.', displayTicker: 'NAVIGATOR', category: 'xtend', sector: 'BÉT Xtend • Ipari Befektetés', currency: 'HUF', order: 68, fallbackPrice: 105, fallbackOpen: 100, fallbackLow: 100, fallbackHigh: 106, fallbackBase: 100, fallbackChange: 5, fallbackChgPct: 5.00, fallbackVal: 2026500, fallbackVol: 19300, fallbackDate: '2026-11-13', decimals: 0 },
+            'O3PNRS.HU':       { name: 'OXO Technologies Holding (O3PNRS)', displayTicker: 'O3PNRS', category: 'xtend', sector: 'BÉT Xtend • Tech Holding (EUR)', currency: 'EUR', order: 69, fallbackPrice: 9.1, fallbackOpen: 9.1, fallbackLow: 9.1, fallbackHigh: 9.1, fallbackBase: 9.1, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 4095, fallbackVol: 450, fallbackDate: '2026-11-13', decimals: 1 },
+            'POLYDUCT.HU':     { name: 'Polyduct Nyrt.', displayTicker: 'POLYDUCT', category: 'xtend', sector: 'BÉT Xtend • Műanyagipar', currency: 'HUF', order: 70, fallbackPrice: 10000, fallbackOpen: 10000, fallbackLow: 10000, fallbackHigh: 10000, fallbackBase: 10000, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2026-11-09', decimals: 0 },
+            'VALBERG.HU':      { name: 'Valberg Nyrt.', displayTicker: 'VALBERG', category: 'xtend', sector: 'BÉT Xtend • Ingatlan', currency: 'HUF', order: 71, fallbackPrice: 10, fallbackOpen: 10, fallbackLow: 10, fallbackHigh: 10, fallbackBase: 10, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2022-12-28', decimals: 0 },
+            'VVT.HU':          { name: 'Vertikál Xtend (VVT)', displayTicker: 'VVT', category: 'xtend', sector: 'BÉT Xtend • Környezetvédelem', currency: 'HUF', order: 72, fallbackPrice: 300, fallbackOpen: 300, fallbackLow: 300, fallbackHigh: 300, fallbackBase: 300, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 630000, fallbackVol: 2100, fallbackDate: '2026-11-12', decimals: 0 }
+        };
+
+        // Beépített minta CSV generálása a BET_METADATA összes (73) eleméből
+        const FALLBACK_SAMPLE_CSV = [
+            'Symbol,Date,Time,Open,High,Low,Close,Volume,Name',
+            ...Object.entries(BET_METADATA).map(([sym, m]) =>
+                `${sym},${m.fallbackDate},17:00:00,${m.fallbackOpen},${m.fallbackHigh},${m.fallbackLow},${m.fallbackPrice},${m.fallbackVol},${m.displayTicker || sym}`
+            )
+        ].join('\n');
 
         // Alkalmazás állapot (State)
         let csvUrl = './bet_data.csv';
         let stocksList = [];        // Feldolgozott részvények listája
         let stockMap = {};          // symbol -> stockObj
         let selectedTicker = 'OTP.HU';
-        let currentCategory = 'all';
+        let currentCategory = 'favorites'; // Mindig a Kedvencekkel nyílik meg az oldal!
         let currentViewMode = 'table'; // 'table' | 'cards'
-        let favorites = [];
+        let favorites = ['OTP.HU', 'MOL.HU', 'RICHT.HU', 'MTEL.HU'];
         let portfolio = [];
         let priceHistoryLog = {};   // symbol -> [{ time, price }] (localStorage-ban épülő idősor)
         let isAutoRefresh = true;
@@ -733,6 +743,8 @@ VVT.HU,2026-11-12,17:00:00,300,300,300,300,2100,VVT`;
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             loadLocalStorageState();
+            // Mindig a Kedvencek füllel indulunk
+            setCategoryFilter('favorites');
             updateMarketStatusUI();
 
             // CSV adat betöltése (először megpróbálja a ./bet_data.csv-t)
@@ -752,8 +764,24 @@ VVT.HU,2026-11-12,17:00:00,300,300,300,300,2100,VVT`;
                     document.getElementById('footer-csv-path').textContent = csvUrl;
                 }
 
+                const savedEur = localStorage.getItem('bet_eur_rate_v6');
+                if (savedEur && !isNaN(parseFloat(savedEur))) {
+                    EUR_HUF_RATE = parseFloat(savedEur);
+                    const eurInput = document.getElementById('custom-eur-rate');
+                    if (eurInput) eurInput.value = EUR_HUF_RATE;
+                    const eurFooter = document.getElementById('footer-eur-rate');
+                    if (eurFooter) eurFooter.textContent = `${EUR_HUF_RATE} Ft`;
+                }
+
                 const savedFavs = localStorage.getItem('bet_favorites_v2');
-                if (savedFavs) favorites = JSON.parse(savedFavs);
+                if (savedFavs) {
+                    const parsedFavs = JSON.parse(savedFavs);
+                    if (Array.isArray(parsedFavs) && parsedFavs.length > 0) {
+                        favorites = parsedFavs;
+                    }
+                } else {
+                    saveFavorites();
+                }
 
                 const savedHistory = localStorage.getItem('bet_history_log_v2');
                 if (savedHistory) priceHistoryLog = JSON.parse(savedHistory);
@@ -764,16 +792,30 @@ VVT.HU,2026-11-12,17:00:00,300,300,300,300,2100,VVT`;
                 } else {
                     // Induló minta portfólió .HU Stooq tickerekkel
                     portfolio = [
-                        { id: 'pf-1', symbol: 'OTP.HU', qty: 30, buyPrice: 22400 },
-                        { id: 'pf-2', symbol: 'MOL.HU', qty: 200, buyPrice: 2790 },
-                        { id: 'pf-3', symbol: 'ALTEO.HU', qty: 60, buyPrice: 4450 },
-                        { id: 'pf-4', symbol: 'NAP.HU', qty: 150, buyPrice: 1320 },
+                        { id: 'pf-1', symbol: 'OTP.HU', qty: 20, buyPrice: 39800 },
+                        { id: 'pf-2', symbol: 'MOL.HU', qty: 150, buyPrice: 4750 },
+                        { id: 'pf-3', symbol: 'GLOSTER.HU', qty: 500, buyPrice: 490 },
+                        { id: 'pf-4', symbol: 'GSPARK.HU', qty: 40, buyPrice: 14.5 },
                         { id: 'pf-5', symbol: 'ASTRASUN.HU', qty: 800, buyPrice: 205 }
                     ];
                     savePortfolio();
                 }
             } catch (err) {
                 console.error('LocalStorage olvasási hiba:', err);
+            }
+        }
+
+        function saveEurRate() {
+            const val = parseFloat(document.getElementById('custom-eur-rate')?.value);
+            if (!isNaN(val) && val > 100) {
+                EUR_HUF_RATE = val;
+                localStorage.setItem('bet_eur_rate_v6', String(EUR_HUF_RATE));
+                const eurFooter = document.getElementById('footer-eur-rate');
+                if (eurFooter) eurFooter.textContent = `${EUR_HUF_RATE} Ft`;
+                renderAllUI();
+                showToast(`EUR/HUF árfolyam frissítve: ${EUR_HUF_RATE} Ft`, 'success');
+            } else {
+                showToast('Kérlek adj meg érvényes EUR/HUF árfolyamot!', 'warning');
             }
         }
 
@@ -809,9 +851,23 @@ VVT.HU,2026-11-12,17:00:00,300,300,300,300,2100,VVT`;
         /***********************************************************************
          * 3. STOOQ CSV BETÖLTÉSE ÉS FELDOLGOZÁSA (PROXY NÉLKÜL)
          ***********************************************************************/
+        function setRefreshSpinner(isSpinning) {
+            const wrapper = document.getElementById('refresh-icon-wrapper');
+            if (!wrapper) return;
+            if (isSpinning) {
+                wrapper.classList.add('animate-spin');
+            } else {
+                wrapper.classList.remove('animate-spin');
+            }
+            // Biztosítjuk, hogy a belső SVG-n se ragadjon rajta semmilyen forgató osztály
+            const innerIcon = wrapper.querySelector('svg, i');
+            if (innerIcon) {
+                innerIcon.classList.remove('animate-spin');
+            }
+        }
+
         async function loadCsvData(showNotification = false) {
-            const refreshIcon = document.getElementById('refresh-icon');
-            if (refreshIcon) refreshIcon.classList.add('animate-spin');
+            setRefreshSpinner(true);
 
             try {
                 // Cache-busting paraméter, hogy a GitHub Pages mindig a legfrissebbet adja
@@ -847,7 +903,7 @@ VVT.HU,2026-11-12,17:00:00,300,300,300,300,2100,VVT`;
                     showToast(`A "${csvUrl}" nem érhető el (${err.message}). Előnézeti minta CSV aktív.`, 'warning');
                 }
             } finally {
-                if (refreshIcon) refreshIcon.classList.remove('animate-spin');
+                setRefreshSpinner(false);
             }
         }
 
@@ -869,8 +925,13 @@ VVT.HU,2026-11-12,17:00:00,300,300,300,300,2100,VVT`;
                 const cols = lines[i].split(',');
                 if (cols.length < 7) continue;
 
-                const rawSymbol = cols[0].trim().toUpperCase();
+                let rawSymbol = cols[0].trim().toUpperCase();
                 if (!rawSymbol) continue;
+
+                // Ticker alias feloldás (pl. RICHTER.HU -> RICHT.HU, MTELEKOM.HU -> MTEL.HU, DUNA.HU -> DHGROUP.HU)
+                if (SYMBOL_ALIASES[rawSymbol]) {
+                    rawSymbol = SYMBOL_ALIASES[rawSymbol];
+                }
 
                 const dateStr = cols[1]?.trim() || '';
                 const timeStr = cols[2]?.trim() || '';
@@ -879,12 +940,12 @@ VVT.HU,2026-11-12,17:00:00,300,300,300,300,2100,VVT`;
                 const lowVal  = parseFloat(cols[5]);
                 const closeVal = parseFloat(cols[6]);
                 const volVal  = parseFloat(cols[7]);
-                // Ha a cégnevekben vessző lenne, összefűzzük a 8. oszloptól
                 const rawName = cols.slice(8).join(',').trim() || rawSymbol;
 
                 const meta = BET_METADATA[rawSymbol] || {
                     name: rawName,
-                    category: rawSymbol === '^BUX' ? 'index' : 'xtend',
+                    displayTicker: rawSymbol.replace('.HU', ''),
+                    category: rawSymbol === '^BUX' ? 'index' : 'midcap',
                     sector: 'BÉT Részvény',
                     currency: 'HUF',
                     isIndex: rawSymbol.startsWith('^'),
@@ -892,18 +953,38 @@ VVT.HU,2026-11-12,17:00:00,300,300,300,300,2100,VVT`;
                 };
 
                 const hasClose = !isNaN(closeVal) && closeVal > 0;
-                const fallbackPrice = meta.fallbackPrice || 0;
-                const fallbackOpen = meta.fallbackOpen || fallbackPrice;
+                const fallbackPrice = meta.fallbackPrice ?? 0;
+                const fallbackOpen  = meta.fallbackOpen ?? fallbackPrice;
+                const fallbackLow   = meta.fallbackLow ?? Math.min(fallbackPrice, fallbackOpen);
+                const fallbackHigh  = meta.fallbackHigh ?? Math.max(fallbackPrice, fallbackOpen);
+                const fallbackBase  = meta.fallbackBase ?? fallbackOpen;
 
                 const price = hasClose ? closeVal : (!isNaN(openVal) && openVal > 0 ? openVal : fallbackPrice);
-                const open = (!isNaN(openVal) && openVal > 0) ? openVal : (hasClose ? closeVal : fallbackOpen);
-                const high = (!isNaN(highVal) && highVal > 0) ? highVal : Math.max(price, open);
-                const low  = (!isNaN(lowVal) && lowVal > 0) ? lowVal : Math.min(price, open);
-                const volume = (!isNaN(volVal) && volVal >= 0) ? volVal : 0;
+                const open  = (!isNaN(openVal) && openVal > 0) ? openVal : fallbackOpen;
+                const high  = (!isNaN(highVal) && highVal > 0) ? highVal : Math.max(price, open, fallbackHigh);
+                const low   = (!isNaN(lowVal) && lowVal > 0) ? lowVal : Math.min(price, open, fallbackLow);
+                const volume = (!isNaN(volVal) && volVal >= 0) ? volVal : (meta.fallbackVol ?? 0);
 
-                // Napon belüli változás a Nyitóárhoz (Open) képest
-                const change = Math.round((price - open) * 10000) / 10000;
-                const changePercent = open > 0 ? (change / open) * 100 : 0;
+                // Ha az ár megegyezik a képernyőkép fallback árral, a pontos BÉT bázisárat és változást használjuk;
+                // ha új élő Stooq ár érkezett, akkor a bázisárhoz (vagy nyitóárhoz) mérjük
+                const basePrice = fallbackBase > 0 ? fallbackBase : open;
+                let change = 0;
+                let changePercent = 0;
+
+                if (Math.abs(price - fallbackPrice) < 0.0001 && typeof meta.fallbackChange === 'number') {
+                    change = meta.fallbackChange;
+                    changePercent = meta.fallbackChgPct;
+                } else {
+                    const refPrice = (open > 0 && price !== open) ? open : basePrice;
+                    change = Math.round((price - refPrice) * 10000) / 10000;
+                    changePercent = refPrice > 0 ? (change / refPrice) * 100 : 0;
+                }
+
+                // Forgalom érték (ha a képernyőkép adata aktív, a pontos forgalmi értéket vesszük, különben volume * price)
+                let turnoverValue = volume * price;
+                if (Math.abs(volume - (meta.fallbackVol || 0)) < 1 && typeof meta.fallbackVal === 'number' && meta.fallbackVal > 0) {
+                    turnoverValue = meta.fallbackVal;
+                }
 
                 // Hol áll az árfolyam a napi Min - Max sávban (0% - 100%)
                 let rangePositionPct = 50;
@@ -916,6 +997,7 @@ VVT.HU,2026-11-12,17:00:00,300,300,300,300,2100,VVT`;
 
                 const item = {
                     symbol: rawSymbol,
+                    displayTicker: meta.displayTicker || rawSymbol.replace('.HU', ''),
                     name: meta.name || (rawName !== 'N/D' ? rawName : rawSymbol),
                     stooqName: rawName,
                     category: meta.category,
@@ -929,8 +1011,10 @@ VVT.HU,2026-11-12,17:00:00,300,300,300,300,2100,VVT`;
                     open,
                     high,
                     low,
+                    basePrice,
                     price,
                     volume,
+                    turnoverValue,
                     change,
                     changePercent,
                     rangePositionPct
@@ -943,16 +1027,28 @@ VVT.HU,2026-11-12,17:00:00,300,300,300,300,2100,VVT`;
                 recordPriceHistoryPoint(rawSymbol, `${item.date} ${item.time}`, price);
             }
 
-            // Ha a GitHub-on lévő régebbi bet_data.csv-ből még hiányoznának az Xtend papírok,
-            // automatikusan kiegészítjük őket a BET_METADATA utolsó ismert kötéseivel, hogy mind a 39 papír mindig látszódjon!
+            // Ha a GitHub-on lévő bet_data.csv-ből még hiányozna bármelyik a 73 instrumentum közül,
+            // automatikusan kiegészítjük őket a BET_METADATA pontos BÉT kötéseivel!
             Object.entries(BET_METADATA).forEach(([sym, meta]) => {
                 if (!newMap[sym]) {
-                    const price = meta.fallbackPrice || 0;
-                    const open = meta.fallbackOpen || price;
-                    const change = Math.round((price - open) * 10000) / 10000;
-                    const changePercent = open > 0 ? (change / open) * 100 : 0;
+                    const price = meta.fallbackPrice ?? 0;
+                    const open  = meta.fallbackOpen ?? price;
+                    const high  = meta.fallbackHigh ?? Math.max(price, open);
+                    const low   = meta.fallbackLow ?? Math.min(price, open);
+                    const basePrice = meta.fallbackBase ?? open;
+                    const change = meta.fallbackChange ?? Math.round((price - basePrice) * 10000) / 10000;
+                    const changePercent = meta.fallbackChgPct ?? (basePrice > 0 ? (change / basePrice) * 100 : 0);
+                    const volume = meta.fallbackVol ?? 0;
+                    const turnoverValue = meta.fallbackVal ?? (volume * price);
+
+                    let rangePositionPct = 50;
+                    if (high > low) {
+                        rangePositionPct = Math.max(0, Math.min(100, ((price - low) / (high - low)) * 100));
+                    }
+
                     const fallbackItem = {
                         symbol: sym,
+                        displayTicker: meta.displayTicker || sym.replace('.HU', ''),
                         name: meta.name,
                         stooqName: meta.name,
                         category: meta.category,
@@ -964,13 +1060,15 @@ VVT.HU,2026-11-12,17:00:00,300,300,300,300,2100,VVT`;
                         date: meta.fallbackDate || '2026-11-13',
                         time: '17:00:00',
                         open,
-                        high: Math.max(price, open),
-                        low: Math.min(price, open),
+                        high,
+                        low,
+                        basePrice,
                         price,
-                        volume: 0,
+                        volume,
+                        turnoverValue,
                         change,
                         changePercent,
-                        rangePositionPct: 50
+                        rangePositionPct
                     };
                     parsedItems.push(fallbackItem);
                     newMap[sym] = fallbackItem;
@@ -983,7 +1081,10 @@ VVT.HU,2026-11-12,17:00:00,300,300,300,300,2100,VVT`;
 
             // Frissítési időbélyeg
             const now = new Date();
-            document.getElementById('last-updated-time').textContent = now.toLocaleTimeString('hu-HU');
+            const timeFormatted = now.toLocaleTimeString('hu-HU');
+            document.getElementById('last-updated-time').textContent = timeFormatted;
+            const footerSyncEl = document.getElementById('footer-sync-time');
+            if (footerSyncEl) footerSyncEl.textContent = timeFormatted;
 
             // Legfrissebb Stooq dátum/idő kiírása a fejlécbe
             const otpOrFirst = stockMap['OTP.HU'] || stocksList[0];
@@ -1056,7 +1157,7 @@ VVT.HU,2026-11-12,17:00:00,300,300,300,300,2100,VVT`;
 
         function setCategoryFilter(cat) {
             currentCategory = cat;
-            ['all', 'bluechip', 'midcap', 'xtend', 'favorites'].forEach(c => {
+            ['all', 'regulated', 'bluechip', 'midcap', 'xtend', 'favorites'].forEach(c => {
                 const btn = document.getElementById(`cat-${c}`);
                 if (!btn) return;
                 if (c === cat) {
@@ -1097,6 +1198,7 @@ VVT.HU,2026-11-12,17:00:00,300,300,300,300,2100,VVT`;
             document.getElementById('fav-count-badge').textContent = favorites.length;
 
             let list = stocksList.filter(item => {
+                if (currentCategory === 'regulated' && item.category !== 'bluechip' && item.category !== 'midcap') return false;
                 if (currentCategory === 'bluechip' && item.category !== 'bluechip') return false;
                 if (currentCategory === 'midcap' && item.category !== 'midcap') return false;
                 if (currentCategory === 'xtend' && item.category !== 'xtend') return false;
@@ -1104,6 +1206,7 @@ VVT.HU,2026-11-12,17:00:00,300,300,300,300,2100,VVT`;
 
                 if (query) {
                     return item.symbol.toLowerCase().includes(query) ||
+                           (item.displayTicker && item.displayTicker.toLowerCase().includes(query)) ||
                            item.name.toLowerCase().includes(query) ||
                            item.sector.toLowerCase().includes(query);
                 }
@@ -1114,12 +1217,14 @@ VVT.HU,2026-11-12,17:00:00,300,300,300,300,2100,VVT`;
                 list.sort((a, b) => b.changePercent - a.changePercent);
             } else if (sortMode === 'change_asc') {
                 list.sort((a, b) => a.changePercent - b.changePercent);
+            } else if (sortMode === 'value_desc') {
+                list.sort((a, b) => (b.turnoverValue || 0) - (a.turnoverValue || 0));
             } else if (sortMode === 'volume_desc') {
                 list.sort((a, b) => b.volume - a.volume);
             } else if (sortMode === 'price_desc') {
                 list.sort((a, b) => b.price - a.price);
             } else if (sortMode === 'symbol_asc') {
-                list.sort((a, b) => a.symbol.localeCompare(b.symbol));
+                list.sort((a, b) => (a.displayTicker || a.symbol).localeCompare(b.displayTicker || b.symbol));
             } else {
                 list.sort((a, b) => a.order - b.order);
             }
@@ -1133,9 +1238,12 @@ VVT.HU,2026-11-12,17:00:00,300,300,300,300,2100,VVT`;
             const cardsBox = document.getElementById('stock-cards-container');
 
             if (filtered.length === 0) {
-                const emptyHtml = `<tr><td colspan="7" class="py-8 text-center text-xs text-slate-500">Nincs a szűrésnek megfelelő BÉT papír.</td></tr>`;
+                const emptyMsg = currentCategory === 'favorites'
+                    ? 'Még nincs kijelölt kedvenc részvényed. Válts az „Összes (73)” vagy „Részvények (52)” fülre, és kattints a ★ csillagra!'
+                    : 'Nincs a szűrésnek megfelelő BÉT papír.';
+                const emptyHtml = `<tr><td colspan="7" class="py-8 text-center text-xs text-slate-400">${emptyMsg}</td></tr>`;
                 tbody.innerHTML = emptyHtml;
-                cardsBox.innerHTML = `<div class="col-span-2 py-8 text-center text-xs text-slate-500">Nincs a szűrésnek megfelelő BÉT papír.</div>`;
+                cardsBox.innerHTML = `<div class="col-span-2 py-8 text-center text-xs text-slate-400">${emptyMsg}</div>`;
                 return;
             }
 
@@ -1163,23 +1271,25 @@ VVT.HU,2026-11-12,17:00:00,300,300,300,300,2100,VVT`;
                             ? '<span class="text-[9px] uppercase px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono">Xtend</span>'
                             : '<span class="text-[9px] uppercase px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">Mid</span>';
 
+                const dispTicker = item.displayTicker || item.symbol.replace('.HU', '');
+
                 return `
                     <tr onclick="selectTicker('${item.symbol}')" class="cursor-pointer hover:bg-slate-800/50 transition ${isSelected ? 'ticker-row-active' : ''}">
-                        <td class="py-3 pl-3 pr-1 text-center" onclick="event.stopPropagation(); toggleFavorite('${item.symbol}')">
+                        <td class="py-2.5 pl-3 pr-1 text-center" onclick="event.stopPropagation(); toggleFavorite('${item.symbol}')">
                             <button class="text-sm ${isFav ? 'text-amber-400' : 'text-slate-600 hover:text-slate-400'}" title="Kedvenc">★</button>
                         </td>
-                        <td class="py-3 px-2">
+                        <td class="py-2.5 px-2">
                             <div class="flex items-center gap-2">
-                                <span class="font-mono font-bold text-white text-xs">${item.symbol.replace('.HU', '')}</span>
-                                <span class="text-[10px] font-mono text-slate-500">${item.symbol.includes('.HU') ? '.HU' : ''}</span>
+                                <span class="font-mono font-bold text-white text-xs">${dispTicker}</span>
                                 ${catBadge}
+                                <span class="text-[10px] font-mono text-slate-500">${item.date}</span>
                             </div>
-                            <div class="text-xs text-slate-400 truncate max-w-[190px] sm:max-w-[240px]">${item.name}</div>
+                            <div class="text-xs text-slate-400 truncate max-w-[190px] sm:max-w-[230px]">${item.name}</div>
                         </td>
-                        <td class="py-3 px-2 text-right font-mono font-bold text-white whitespace-nowrap">
+                        <td class="py-2.5 px-2 text-right font-mono font-bold text-white whitespace-nowrap">
                             ${formatNumber(item.price, decimals)} <span class="text-[10px] font-normal ${item.currency === 'EUR' ? 'text-amber-300 font-semibold' : 'text-slate-400'}">${item.currency}</span>
                         </td>
-                        <td class="py-3 px-2 text-right whitespace-nowrap">
+                        <td class="py-2.5 px-2 text-right whitespace-nowrap">
                             <div class="inline-flex flex-col items-end">
                                 <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded border ${badgeBg}">
                                     ${sign}${item.changePercent.toFixed(2)}%
@@ -1189,8 +1299,12 @@ VVT.HU,2026-11-12,17:00:00,300,300,300,300,2100,VVT`;
                                 </span>
                             </div>
                         </td>
-                        <td class="py-3 px-3 hidden md:table-cell">
-                            <div class="w-32 mx-auto">
+                        <td class="py-2.5 px-2 text-right font-mono text-xs hidden md:table-cell whitespace-nowrap">
+                            <div class="text-slate-200" title="Nyitóár">${formatNumber(item.open, decimals)}</div>
+                            <div class="text-[10px] text-slate-500" title="Bázisár">Bázis: ${formatNumber(item.basePrice ?? item.open, decimals)}</div>
+                        </td>
+                        <td class="py-2.5 px-3 hidden lg:table-cell">
+                            <div class="w-28 mx-auto">
                                 <div class="flex justify-between text-[10px] font-mono text-slate-400 mb-1">
                                     <span>${formatNumber(item.low, decimals)}</span>
                                     <span>${formatNumber(item.high, decimals)}</span>
@@ -1200,12 +1314,11 @@ VVT.HU,2026-11-12,17:00:00,300,300,300,300,2100,VVT`;
                                 </div>
                             </div>
                         </td>
-                        <td class="py-3 px-2 text-right font-mono text-xs text-slate-300 hidden sm:table-cell whitespace-nowrap">
-                            ${item.isIndex ? '<span class="text-slate-600">—</span>' : formatCompactNumber(item.volume)}
-                        </td>
-                        <td class="py-3 pl-2 pr-4 text-right font-mono text-[11px] text-slate-400 hidden xl:table-cell whitespace-nowrap">
-                            <div>${item.date}</div>
-                            <div class="text-[10px] text-slate-500">${item.time.slice(0, 5)}</div>
+                        <td class="py-2.5 pl-2 pr-4 text-right font-mono text-xs text-slate-300 hidden sm:table-cell whitespace-nowrap">
+                            ${item.isIndex ? '<span class="text-slate-600">—</span>' : `
+                                <div class="text-slate-200 font-semibold">${formatCompactCurrency(item.turnoverValue, item.currency)}</div>
+                                <div class="text-[10px] text-slate-500">${formatNumber(item.volume, 0)} db</div>
+                            `}
                         </td>
                     </tr>
                 `;
@@ -1229,8 +1342,8 @@ VVT.HU,2026-11-12,17:00:00,300,300,300,300,2100,VVT`;
                         <div class="flex items-start justify-between gap-2">
                             <div>
                                 <div class="flex items-center gap-1.5">
-                                    <span class="font-mono font-bold text-sm text-white">${item.symbol}</span>
-                                    <span class="text-[10px] text-slate-400">${item.sector}</span>
+                                    <span class="font-mono font-bold text-sm text-white">${item.displayTicker || item.symbol}</span>
+                                    <span class="text-[10px] text-slate-400">${item.date}</span>
                                 </div>
                                 <div class="text-xs text-slate-300 font-medium truncate max-w-[200px]">${item.name}</div>
                             </div>
@@ -1243,7 +1356,7 @@ VVT.HU,2026-11-12,17:00:00,300,300,300,300,2100,VVT`;
                                 ${formatNumber(item.price, decimals)} <span class="text-xs font-normal text-slate-400">${item.currency}</span>
                             </div>
                             <div class="text-[11px] font-mono text-slate-400">
-                                Forg: <strong class="text-slate-200">${item.isIndex ? '—' : formatCompactNumber(item.volume)}</strong>
+                                Bázis: <strong class="text-slate-200">${formatNumber(item.basePrice ?? item.open, decimals)}</strong>
                             </div>
                         </div>
                     </div>
@@ -1309,12 +1422,9 @@ VVT.HU,2026-11-12,17:00:00,300,300,300,300,2100,VVT`;
 
             // 4 Statisztikai kártya
             document.getElementById('stat-open').textContent = `${formatNumber(item.open, decimals)} ${item.currency}`;
-            document.getElementById('stat-close').textContent = `${formatNumber(item.price, decimals)} ${item.currency}`;
+            document.getElementById('stat-base').textContent = `${formatNumber(item.basePrice ?? item.open, decimals)} ${item.currency}`;
             document.getElementById('stat-volume').textContent = item.isIndex ? 'Index' : `${formatNumber(item.volume, 0)} db`;
-
-            const fxMultiplier = item.currency === 'EUR' ? EUR_HUF_RATE : 1;
-            const estTurnoverM = item.isIndex ? 0 : (item.volume * item.price * fxMultiplier) / 1_000_000;
-            document.getElementById('stat-turnover').textContent = item.isIndex ? '—' : `${formatNumber(estTurnoverM, 1)} M Ft`;
+            document.getElementById('stat-turnover').textContent = item.isIndex ? '—' : formatCompactCurrency(item.turnoverValue, item.currency);
 
             // Stooq külső link
             document.getElementById('ext-link-stooq').href = `https://stooq.com/q/?s=${encodeURIComponent(item.symbol.toLowerCase())}`;
@@ -1701,14 +1811,13 @@ VVT.HU,2026-11-12,17:00:00,300,300,300,300,2100,VVT`;
         }
 
         /***********************************************************************
-         * 8. CSV BEÁLLÍTÁSOK MODAL, KÉZI CSV FELTÖLTÉS ÉS SEGÉDFÜGGVÉNYEK
+         * 8. TECHNIKAI ESZKÖZÖK, MANUÁLIS CSV TESZTELÉS ÉS SEGÉDFÜGGVÉNYEK
          ***********************************************************************/
         function saveCsvUrlAndReload() {
             const val = document.getElementById('custom-csv-url').value.trim() || './bet_data.csv';
             csvUrl = val;
             localStorage.setItem('bet_csv_url_v2', csvUrl);
             document.getElementById('footer-csv-path').textContent = csvUrl;
-            closeModal('csv-settings-modal');
             loadCsvData(true);
         }
 
@@ -1724,7 +1833,6 @@ VVT.HU,2026-11-12,17:00:00,300,300,300,300,2100,VVT`;
                     dataSourceMode = 'manual_csv';
                     updateHeaderStatusUI();
                     renderAllUI();
-                    closeModal('csv-settings-modal');
                     showToast(`Feltöltött CSV fájl betöltve (${count} instrumentum)!`, 'success');
                 } else {
                     showToast('A kiválasztott fájl nem érvényes Stooq CSV formátumú.', 'warning');
@@ -1740,7 +1848,6 @@ VVT.HU,2026-11-12,17:00:00,300,300,300,300,2100,VVT`;
                 dataSourceMode = 'manual_csv';
                 updateHeaderStatusUI();
                 renderAllUI();
-                closeModal('csv-settings-modal');
                 showToast(`Beillesztett CSV feldolgozva (${count} instrumentum)!`, 'success');
             } else {
                 showToast('Kérlek illessz be érvényes Stooq CSV szöveget!', 'warning');
@@ -1859,6 +1966,14 @@ VVT.HU,2026-11-12,17:00:00,300,300,300,300,2100,VVT`;
             if (num >= 1_000_000) return (num / 1_000_000).toFixed(2) + ' M';
             if (num >= 1_000) return (num / 1_000).toFixed(1) + ' E';
             return num.toLocaleString('hu-HU');
+        }
+
+        function formatCompactCurrency(val, currency = 'HUF') {
+            if (!val || isNaN(val) || val <= 0) return `0 ${currency}`;
+            if (val >= 1_000_000_000) return (val / 1_000_000_000).toFixed(2) + ' Mrd ' + currency;
+            if (val >= 1_000_000) return (val / 1_000_000).toFixed(2) + ' M ' + currency;
+            if (val >= 10_000) return (val / 1_000).toFixed(1) + ' E ' + currency;
+            return formatNumber(val, currency === 'EUR' ? 1 : 0) + ' ' + currency;
         }
 
         function showToast(message, type = 'info') {
