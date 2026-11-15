@@ -28,26 +28,25 @@ jobs:
       - name: Repo letoltese
         uses: actions/checkout@v4
 
-      - name: Stooq BET (BUX + Blue-Chip + Mid-Cap + 20 Xtend) adatok lekerese
-    run: |
-      curl -s "https://stooq.com/q/l/?s=^bux+otp.hu+mol.hu+richt.hu+mtel.hu+opus.hu+4ig.hu+autowallis.hu+alteo.hu+waberers.hu+any.hu+masterplast.hu+pannergy.hu+graphisoft.hu+cigpannonia.hu+appeninn.hu+duna.hu+raba.hu+zwack.hu+astrasun.hu+biggeorge.hu+cdsys.hu+chome.hu+coolklima.hu+deltakamatoz.hu+energyinvest.hu+epduferr.hu+glia.hu+gopd.hu+kermannit.hu+metmax.hu+multihome.hu+nap.hu+naturland.hu+navigator.hu+o3pnrs.hu+polyduct.hu+valberg.hu+vvt.hu&f=sd2t2ohlcvn&h&e=csv" -o bet_data.csv
+      - name: Stooq BET, Mid-Cap es Xtend adatok lekerese
+        run: |
+          curl -s "https://stooq.com/q/l/?s=^bux+otp.hu+mol.hu+richt.hu+mtel.hu+opus.hu+4ig.hu+autowallis.hu+alteo.hu+waberers.hu+any.hu+masterplast.hu+pannergy.hu+graphisoft.hu+cigpannonia.hu+appeninn.hu+duna.hu+raba.hu+zwack.hu+astrasun.hu+biggeorge.hu+cdsys.hu+chome.hu+coolklima.hu+deltakamatoz.hu+energyinvest.hu+epduferr.hu+glia.hu+gopd.hu+kermannit.hu+metmax.hu+multihome.hu+nap.hu+naturland.hu+navigator.hu+o3pnrs.hu+polyduct.hu+valberg.hu+vvt.hu&f=sd2t2ohlcvn&h&e=csv" -o bet_data.csv
 
-  - name: CSV mentese a repoba (ha valtozott)
-    run: |
-      git config --local user.email "github-actions[bot]@users.noreply.github.com"
-      git config --local user.name "github-actions[bot]"
-      git add bet_data.csv
-      git diff --staged --quiet || (git commit -m "Auto-update BET & Xtend data [skip ci]" && git push)
+      - name: CSV mentese a repoba (ha valtozott)
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add bet_data.csv
+          git diff --staged --quiet || (git commit -m "Auto-update BET data [skip ci]" && git push)
 
-  - name: GitHub Pages beallitasa
-    uses: actions/configure-pages@v5
+      - name: GitHub Pages beallitasa
+        uses: actions/configure-pages@v5
 
-  - name: Fajlok becsomagolasa a Pages-hez
-    uses: actions/upload-pages-artifact@v3
-    with:
-      path: '.'
+      - name: Fajlok becsomagolasa a Pages-hez
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
 
-  - name: Deploy a GitHub Pages-re
-    id: deployment
-    uses: actions/deploy-pages@v4
-
+      - name: Deploy a GitHub Pages-re
+        id: deployment
+        uses: actions/deploy-pages@v4
