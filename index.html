@@ -76,7 +76,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="text-lg font-bold tracking-tight text-white">BÉT Monitor</h1>
-                        <span class="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">Stooq CSV • v6</span>
+                        <span class="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">Stooq CSV • v7</span>
                     </div>
                     <p class="text-xs text-slate-400">Teljes BÉT Paletta: Blue-Chip, Mid-Cap & Xtend (73 instrumentum) • GitHub Pages</p>
                 </div>
@@ -192,12 +192,66 @@
 
             </div>
         </div>
+
+        <!-- PIACI KPI SÁV (Összforgalom, Napi Nyertes, Napi Vesztes, Élő EUR/HUF) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-3">
+            <!-- 1. BÉT Napi Összforgalom -->
+            <div class="glass-card rounded-xl p-3.5 border border-slate-800 flex items-center justify-between">
+                <div>
+                    <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">BÉT Napi Összforgalom</div>
+                    <div id="kpi-total-turnover" class="font-mono text-lg font-bold text-white mt-0.5">-- Mrd Ft</div>
+                    <div id="kpi-active-count" class="text-[11px] text-slate-400 font-mono">72 részvény követve</div>
+                </div>
+                <div class="w-9 h-9 rounded-lg bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                    <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                </div>
+            </div>
+
+            <!-- 2. Napi Legnagyobb Emelkedő -->
+            <div id="kpi-top-gainer-card" onclick="selectTopMover('gainer')" class="glass-card rounded-xl p-3.5 border border-slate-800 hover:border-emerald-500/40 transition cursor-pointer flex items-center justify-between">
+                <div>
+                    <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Napi Éllovas (Top +%)</div>
+                    <div id="kpi-top-gainer" class="font-mono text-base font-bold text-emerald-400 mt-0.5">--</div>
+                    <div id="kpi-top-gainer-sub" class="text-[11px] text-slate-400 truncate max-w-[180px]">--</div>
+                </div>
+                <div class="w-9 h-9 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                    <i data-lucide="trending-up" class="w-5 h-5"></i>
+                </div>
+            </div>
+
+            <!-- 3. Napi Legnagyobb Eső -->
+            <div id="kpi-top-loser-card" onclick="selectTopMover('loser')" class="glass-card rounded-xl p-3.5 border border-slate-800 hover:border-rose-500/40 transition cursor-pointer flex items-center justify-between">
+                <div>
+                    <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Napi Leghátrébb (Top -%)</div>
+                    <div id="kpi-top-loser" class="font-mono text-base font-bold text-rose-400 mt-0.5">--</div>
+                    <div id="kpi-top-loser-sub" class="text-[11px] text-slate-400 truncate max-w-[180px]">--</div>
+                </div>
+                <div class="w-9 h-9 rounded-lg bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400">
+                    <i data-lucide="trending-down" class="w-5 h-5"></i>
+                </div>
+            </div>
+
+            <!-- 4. Élő EUR / HUF Devizaárfolyam -->
+            <div class="glass-card rounded-xl p-3.5 border border-slate-800 flex items-center justify-between">
+                <div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">EUR / HUF Árfolyam</span>
+                        <span id="eur-rate-badge" class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">ÉLŐ</span>
+                    </div>
+                    <div id="kpi-eur-huf" class="font-mono text-lg font-bold text-amber-300 mt-0.5">365,05 Ft</div>
+                    <div id="kpi-eur-source" class="text-[10px] text-slate-400 font-mono">GSPARK, SPLUS, UPLAZA, O3PNRS</div>
+                </div>
+                <div class="w-9 h-9 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-300">
+                    <i data-lucide="coins" class="w-5 h-5"></i>
+                </div>
+            </div>
+        </div>
     </section>
 
     <!-- FŐ TARTALOM GRID -->
     <main class="flex-1 max-w-[1600px] w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-5">
 
-        <!-- BAL OLDAL (7 OSZLOP): BÉT RÉSZVÉNYEK (TÁBLÁZAT / KÁRTYA NÉZET) & PORTFÓLIÓ -->
+        <!-- BAL OLDAL (7 OSZLOP): BÉT RÉSZVÉNYEK (TÁBLÁZAT / KÁRTYA NÉZET) -->
         <section class="lg:col-span-7 flex flex-col gap-5">
             
             <div class="glass-card rounded-2xl overflow-hidden flex flex-col shadow-xl">
@@ -265,7 +319,7 @@
                 </div>
 
                 <!-- TÁBLÁZAT NÉZET -->
-                <div id="stock-table-container" class="overflow-x-auto max-h-[720px]">
+                <div id="stock-table-container" class="overflow-x-auto max-h-[880px]">
                     <table class="w-full text-left border-collapse">
                         <thead class="sticky top-0 z-10 bg-slate-900/95 backdrop-blur">
                             <tr class="border-b border-slate-800/80 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
@@ -285,7 +339,7 @@
                 </div>
 
                 <!-- KÁRTYA NÉZET (Alapból rejtett) -->
-                <div id="stock-cards-container" class="hidden p-4 grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[680px] overflow-y-auto">
+                <div id="stock-cards-container" class="hidden p-4 grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[880px] overflow-y-auto">
                     <!-- JS tölti fel -->
                 </div>
 
@@ -297,99 +351,8 @@
                         <span>Forrás: <code id="footer-csv-path" class="text-emerald-400">./bet_data.csv</code></span>
                     </div>
                     <div>
-                        <span>EUR/HUF kalkulált árfolyam: <strong id="footer-eur-rate" class="text-amber-300 font-mono">408 Ft</strong></span>
+                        <span>EUR/HUF devizaárfolyam: <strong id="footer-eur-rate" class="text-amber-300 font-mono">365,05 Ft</strong></span>
                     </div>
-                </div>
-            </div>
-
-            <!-- SAJÁT BÉT PORTFÓLIÓ KÖVETŐ & KALKULÁTOR (LocalStorage) -->
-            <div class="glass-card rounded-2xl overflow-hidden flex flex-col shadow-xl">
-                <div class="p-4 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                        <h2 class="text-base font-bold text-white flex items-center gap-2">
-                            <i data-lucide="wallet" class="w-4 h-4 text-emerald-400"></i>
-                            Saját BÉT Portfólió & Hozam Kalkulátor
-                        </h2>
-                        <p class="text-xs text-slate-400">A pozíciók a böngésződ <code class="text-slate-300">localStorage</code> tárolójában maradnak meg</p>
-                    </div>
-
-                    <!-- Portfólió Összesítő Kártyák -->
-                    <div class="flex flex-wrap items-center gap-2.5">
-                        <div class="bg-slate-900/90 border border-slate-800 px-3 py-1.5 rounded-xl">
-                            <div class="text-[10px] uppercase text-slate-400">Portfólió Piaci Érték</div>
-                            <div id="portfolio-total-value" class="font-mono text-sm font-bold text-white">0 Ft</div>
-                        </div>
-                        <div class="bg-slate-900/90 border border-slate-800 px-3 py-1.5 rounded-xl">
-                            <div class="text-[10px] uppercase text-slate-400">Nem realizált P&L</div>
-                            <div id="portfolio-total-pl" class="font-mono text-sm font-bold text-slate-300">0 Ft (0.00%)</div>
-                        </div>
-                        <div class="bg-slate-900/90 border border-slate-800 px-3 py-1.5 rounded-xl">
-                            <div class="text-[10px] uppercase text-slate-400">Mai Napi Változás</div>
-                            <div id="portfolio-day-change" class="font-mono text-sm font-bold text-slate-300">0 Ft</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Portfólió Súlyozás Sáv -->
-                <div class="px-4 pt-3 pb-2 bg-slate-950/40 border-b border-slate-800/60">
-                    <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1">
-                        <span>Portfólió megoszlás (Súlyozás)</span>
-                        <div class="flex items-center gap-2">
-                            <button onclick="exportPortfolioJson()" class="text-blue-400 hover:underline">JSON Mentés</button>
-                            <span>•</span>
-                            <button onclick="importPortfolioPrompt()" class="text-blue-400 hover:underline">JSON Betöltés</button>
-                        </div>
-                    </div>
-                    <div id="portfolio-allocation-bar" class="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden flex gap-0.5">
-                        <!-- JS tölti fel -->
-                    </div>
-                    <div id="portfolio-allocation-legend" class="flex flex-wrap gap-3 mt-1.5 text-[10px] text-slate-300 font-mono"></div>
-                </div>
-
-                <!-- Új pozíció űrlap -->
-                <form onsubmit="handlePortfolioAdd(event)" class="p-4 bg-slate-900/40 border-b border-slate-800/80 grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
-                    <div class="sm:col-span-4">
-                        <label class="block text-[11px] text-slate-400 mb-1 font-medium">BÉT Részvény (Stooq CSV-ből)</label>
-                        <select id="pf-ticker" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
-                            <!-- JS tölti fel -->
-                        </select>
-                    </div>
-                    <div class="sm:col-span-3">
-                        <label class="block text-[11px] text-slate-400 mb-1 font-medium">Darabszám (db)</label>
-                        <input id="pf-qty" type="number" step="1" min="1" required placeholder="pl. 100"
-                            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-blue-500">
-                    </div>
-                    <div class="sm:col-span-3">
-                        <label class="block text-[11px] text-slate-400 mb-1 font-medium">Átlagos Vételi Ár (Papír devizája)</label>
-                        <input id="pf-buy-price" type="number" step="0.01" min="0.01" required placeholder="pl. 21400"
-                            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-blue-500">
-                    </div>
-                    <div class="sm:col-span-2">
-                        <button type="submit" class="w-full py-2 px-3 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs rounded-lg transition flex items-center justify-center gap-1 shadow-sm">
-                            <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
-                            <span>Rögzítés</span>
-                        </button>
-                    </div>
-                </form>
-
-                <!-- Portfólió Táblázat -->
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="border-b border-slate-800/80 text-[11px] font-semibold uppercase tracking-wider text-slate-400 bg-slate-900/50">
-                                <th class="py-2.5 pl-4 pr-2">Ticker</th>
-                                <th class="py-2.5 px-2 text-right">Mennyiség</th>
-                                <th class="py-2.5 px-2 text-right">Vételi Ár</th>
-                                <th class="py-2.5 px-2 text-right">CSV Árfolyam</th>
-                                <th class="py-2.5 px-2 text-right">Piaci Érték</th>
-                                <th class="py-2.5 px-2 text-right">Összes P&L</th>
-                                <th class="py-2.5 pl-2 pr-4 text-right">Művelet</th>
-                            </tr>
-                        </thead>
-                        <tbody id="portfolio-table-body" class="divide-y divide-slate-800/60 text-xs">
-                            <!-- JS tölti fel -->
-                        </tbody>
-                    </table>
                 </div>
             </div>
 
@@ -484,21 +447,35 @@
                     </div>
                 </div>
 
-                <!-- Gyors Pozíció & Kockázat Kalkulátor a kiválasztott részvényhez -->
+                <!-- Gyors Vásárlási Kalkulátor & Külső Stooq link -->
                 <div class="bg-slate-900/50 border border-slate-800/80 rounded-xl p-3.5">
                     <div class="text-xs font-semibold text-slate-200 mb-2 flex items-center justify-between">
                         <span class="flex items-center gap-1.5">
                             <i data-lucide="calculator" class="w-3.5 h-3.5 text-emerald-400"></i>
-                            Gyors Vásárlási Kalkulátor (<span id="calc-ticker-label" class="font-mono text-blue-400">OTP.HU</span>)
+                            Gyors Darabszám Kalkulátor (<span id="calc-ticker-label" class="font-mono text-blue-400">OTP.HU</span>)
                         </span>
-                        <button onclick="prefillPortfolioFromCalc()" class="text-[11px] text-emerald-400 hover:underline">
-                            Átvezetés a portfólióba →
-                        </button>
+                        <a id="ext-link-stooq" href="https://stooq.com/q/?s=otp.hu" target="_blank" rel="noopener noreferrer" class="text-[11px] text-blue-400 hover:underline flex items-center gap-1">
+                            <span>Stooq Adatlap</span>
+                            <i data-lucide="external-link" class="w-3 h-3"></i>
+                        </a>
                     </div>
-                    <div class="grid grid-cols-2 gap-3 items-center">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
                         <div>
                             <label id="calc-budget-label" class="block text-[10px] text-slate-400 mb-1">Befektetendő összeg (HUF)</label>
-                            <input id="calc-budget" type="number" value="500000" step="1000" oninput="updatePositionCalculator()"
+                            <input id="calc-budget" type="number" value="500000" step="10000" oninput="updatePositionCalculator()"
+                                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-blue-500">
+                        </div>
+                        <div class="bg-slate-950/80 border border-slate-800 rounded-lg px-3 py-1.5 flex items-center justify-between">
+                            <div>
+                                <div class="text-[10px] text-slate-400">Vásárolható mennyiség</div>
+                                <div id="calc-shares-result" class="font-mono text-sm font-bold text-emerald-400">0 db</div>
+                            </div>
+                            <div id="calc-exact-cost" class="text-[11px] font-mono text-slate-300 text-right">Érték: 0 Ft</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- BÉT 73 PAPÍR HŐTÉRKÉP (HEATMAP) -->
             <div class="glass-card rounded-2xl p-4 shadow-xl">
                 <div class="flex items-center justify-between mb-3">
@@ -516,7 +493,7 @@
         </section>
     </main>
 
-    <!-- LÁBLÉC: REJTETT TECHNIKAI ESZKÖZÖK ÉS V6 VERZIÓ INFORMÁCIÓ -->
+    <!-- LÁBLÉC: REJTETT TECHNIKAI ESZKÖZÖK ÉS V7 VERZIÓ INFORMÁCIÓ -->
     <footer class="max-w-[1600px] w-full mx-auto px-4 pt-2 pb-8 mt-auto flex flex-col gap-3">
         
         <!-- Alapból összecsukott technikai / fejlesztői eszközök -->
@@ -545,12 +522,15 @@
                             </div>
                         </div>
                         <div>
-                            <label class="block text-[11px] font-semibold text-slate-300 mb-1">EUR/HUF Árfolyam (GSPARK, SPLUS, UPLAZA, O3PNRS)</label>
+                            <label class="block text-[11px] font-semibold text-slate-300 mb-1">EUR/HUF Árfolyam (Automatikusan frissül API/Stooq-ból)</label>
                             <div class="flex gap-2">
-                                <input id="custom-eur-rate" type="number" step="0.5" value="408"
+                                <input id="custom-eur-rate" type="number" step="0.01" value="365.05"
                                     class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1 text-xs font-mono text-amber-300 focus:outline-none focus:border-blue-500">
                                 <button onclick="saveEurRate()" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold transition">
-                                    Beállít
+                                    Kézi felülírás
+                                </button>
+                                <button onclick="fetchLiveEurHufRate(true)" class="px-2.5 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 font-semibold transition" title="Élő árfolyam lekérése most">
+                                    Élő API
                                 </button>
                             </div>
                         </div>
@@ -586,10 +566,10 @@
                 <!-- 3. GitHub Actions Stooq curl parancs -->
                 <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between gap-2">
                     <div class="flex items-center justify-between">
-                        <strong class="text-xs text-white">3. GitHub Actions Stooq parancs (73 papír)</strong>
+                        <strong class="text-xs text-white">3. GitHub Actions Stooq parancs (73 papír + EURHUF)</strong>
                         <button onclick="copyCurlCommand()" class="text-[11px] px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200">Másolás</button>
                     </div>
-                    <code id="curl-cmd-text" class="block font-mono text-[10px] text-blue-300 break-all bg-slate-950 p-2 rounded-lg border border-slate-800 max-h-24 overflow-y-auto">curl -s "https://stooq.com/q/l/?s=^bux+4ig.hu+akko.hu+alteo.hu+amixa.hu+any.hu+appeninn.hu+autowallis.hu+bet.hu+bgreit.hu+bif.hu+cigpannonia.hu+civita.hu+delta.hu+dhgroup.hu+dmker.hu+enefi.hu+enefiels.hu+eproliusia.hu+esense.hu+finext.hu+finextb.hu+forrasoe.hu+forrast.hu+futuraqua.hu+gloster.hu+goodwillphrm.hu+granit.hu+gspark.hu+masterplast.hu+mbhbank.hu+mbhjb.hu+megakran.hu+mol.hu+mtel.hu+nordgeneral.hu+nutex.hu+opus.hu+ormester.hu+otp.hu+pannergy.hu+pensum.hu+raba.hu+richt.hu+splus.hu+strt.hu+sundell.hu+ubm.hu+uplaza.hu+vertikal.hu+vig.hu+waberers.hu+zwack.hu+astrasun.hu+biggeorge.hu+cdsys.hu+chome.hu+coolklima.hu+deltakamatoz.hu+energyinvest.hu+epduferr.hu+glia.hu+gopd.hu+kermannit.hu+metmax.hu+multihome.hu+nap.hu+naturland.hu+navigator.hu+o3pnrs.hu+polyduct.hu+valberg.hu+vvt.hu&f=sd2t2ohlcvn&h&e=csv" -o bet_data.csv</code>
+                    <code id="curl-cmd-text" class="block font-mono text-[10px] text-blue-300 break-all bg-slate-950 p-2 rounded-lg border border-slate-800 max-h-24 overflow-y-auto">curl -s "https://stooq.com/q/l/?s=^bux+eurhuf+4ig.hu+akko.hu+alteo.hu+amixa.hu+any.hu+appeninn.hu+autowallis.hu+bet.hu+bgreit.hu+bif.hu+cigpannonia.hu+civita.hu+delta.hu+dhgroup.hu+dmker.hu+enefi.hu+enefiels.hu+eproliusia.hu+esense.hu+finext.hu+finextb.hu+forrasoe.hu+forrast.hu+futuraqua.hu+gloster.hu+goodwillphrm.hu+granit.hu+gspark.hu+masterplast.hu+mbhbank.hu+mbhjb.hu+megakran.hu+mol.hu+mtel.hu+nordgeneral.hu+nutex.hu+opus.hu+ormester.hu+otp.hu+pannergy.hu+pensum.hu+raba.hu+richt.hu+splus.hu+strt.hu+sundell.hu+ubm.hu+uplaza.hu+vertikal.hu+vig.hu+waberers.hu+zwack.hu+astrasun.hu+biggeorge.hu+cdsys.hu+chome.hu+coolklima.hu+deltakamatoz.hu+energyinvest.hu+epduferr.hu+glia.hu+gopd.hu+kermannit.hu+metmax.hu+multihome.hu+nap.hu+naturland.hu+navigator.hu+o3pnrs.hu+polyduct.hu+valberg.hu+vvt.hu&f=sd2t2ohlcvn&h&e=csv" -o bet_data.csv</code>
                 </div>
 
             </div>
@@ -598,9 +578,9 @@
         <!-- Verziószám és GitHub Pages Deploy Állapotsor -->
         <div class="flex flex-wrap items-center justify-between gap-2 px-2 text-[11px] text-slate-500 font-mono">
             <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-emerald-400 font-bold">Verzió: v6</span>
+                <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-emerald-400 font-bold">Verzió: v7</span>
                 <span>•</span>
-                <span>BÉT Monitor & Portfólió Terminál (73 Instrumentum • Szabályozott Piac + Xtend)</span>
+                <span>BÉT Monitor & Piaci Terminál (73 Instrumentum • Szabályozott Piac + Xtend)</span>
             </div>
             <div class="flex items-center gap-2">
                 <span>CSV szinkron: <strong id="footer-sync-time" class="text-slate-400">--:--:--</strong></span>
@@ -615,7 +595,8 @@
         /***********************************************************************
          * 1. BÉT METAADATOK A 73 INSTRUMENTUMHOZ (BUX + 52 SZABÁLYOZOTT + 20 XTEND)
          ***********************************************************************/
-        let EUR_HUF_RATE = 408; // Konfigurálható EUR/HUF árfolyam (GSPARK, SPLUS, UPLAZA, O3PNRS)
+        let EUR_HUF_RATE = 365.05; // Aktuális piaci EUR/HUF árfolyam (automatikusan frissül API-ból vagy a Stooq CSV-ből)
+        let eurRateSourceLabel = 'Piaci középárfolyam';
 
         // Alias szótár, hogy a Stooq és BÉT névváltozatok (pl. RICHT / RICHTER, MTEL / MTELEKOM, DUNA / DHGROUP) egyaránt működjenek
         const SYMBOL_ALIASES = {
@@ -730,7 +711,6 @@
         let currentCategory = 'favorites'; // Mindig a Kedvencekkel nyílik meg az oldal!
         let currentViewMode = 'table'; // 'table' | 'cards'
         let favorites = ['OTP.HU', 'MOL.HU', 'RICHT.HU', 'MTEL.HU'];
-        let portfolio = [];
         let priceHistoryLog = {};   // symbol -> [{ time, price }] (localStorage-ban épülő idősor)
         let isAutoRefresh = true;
         let autoRefreshTimer = null;
@@ -746,9 +726,13 @@
             // Mindig a Kedvencek füllel indulunk
             setCategoryFilter('favorites');
             updateMarketStatusUI();
+            updateEurRateUI();
 
             // CSV adat betöltése (először megpróbálja a ./bet_data.csv-t)
             loadCsvData(false);
+
+            // Élő EUR/HUF árfolyam lekérése ingyenes CORS-képes API-ról
+            fetchLiveEurHufRate(false);
 
             // Időzítők indítása
             startAutoRefreshTimer();
@@ -764,13 +748,11 @@
                     document.getElementById('footer-csv-path').textContent = csvUrl;
                 }
 
-                const savedEur = localStorage.getItem('bet_eur_rate_v6');
+                // Új v7-es kulcs, hogy a régi 408 Ft-os elmentett érték ne írja felül a valós 365,05 Ft-os árfolyamot
+                const savedEur = localStorage.getItem('bet_eur_rate_v7');
                 if (savedEur && !isNaN(parseFloat(savedEur))) {
                     EUR_HUF_RATE = parseFloat(savedEur);
-                    const eurInput = document.getElementById('custom-eur-rate');
-                    if (eurInput) eurInput.value = EUR_HUF_RATE;
-                    const eurFooter = document.getElementById('footer-eur-rate');
-                    if (eurFooter) eurFooter.textContent = `${EUR_HUF_RATE} Ft`;
+                    eurRateSourceLabel = 'Mentett árfolyam';
                 }
 
                 const savedFavs = localStorage.getItem('bet_favorites_v2');
@@ -785,23 +767,62 @@
 
                 const savedHistory = localStorage.getItem('bet_history_log_v2');
                 if (savedHistory) priceHistoryLog = JSON.parse(savedHistory);
-
-                const savedPortfolio = localStorage.getItem('bet_portfolio_v2');
-                if (savedPortfolio) {
-                    portfolio = JSON.parse(savedPortfolio);
-                } else {
-                    // Induló minta portfólió .HU Stooq tickerekkel
-                    portfolio = [
-                        { id: 'pf-1', symbol: 'OTP.HU', qty: 20, buyPrice: 39800 },
-                        { id: 'pf-2', symbol: 'MOL.HU', qty: 150, buyPrice: 4750 },
-                        { id: 'pf-3', symbol: 'GLOSTER.HU', qty: 500, buyPrice: 490 },
-                        { id: 'pf-4', symbol: 'GSPARK.HU', qty: 40, buyPrice: 14.5 },
-                        { id: 'pf-5', symbol: 'ASTRASUN.HU', qty: 800, buyPrice: 205 }
-                    ];
-                    savePortfolio();
-                }
             } catch (err) {
                 console.error('LocalStorage olvasási hiba:', err);
+            }
+        }
+
+        function updateEurRateUI() {
+            const formattedRate = formatNumber(EUR_HUF_RATE, 2) + ' Ft';
+            const eurInput = document.getElementById('custom-eur-rate');
+            if (eurInput) eurInput.value = EUR_HUF_RATE.toFixed(2);
+            const eurFooter = document.getElementById('footer-eur-rate');
+            if (eurFooter) eurFooter.textContent = formattedRate;
+            const kpiEur = document.getElementById('kpi-eur-huf');
+            if (kpiEur) kpiEur.textContent = formattedRate;
+            const kpiSource = document.getElementById('kpi-eur-source');
+            if (kpiSource) kpiSource.textContent = `${eurRateSourceLabel} • 4 EUR részvényhez`;
+        }
+
+        async function fetchLiveEurHufRate(showToastMsg = false) {
+            try {
+                // 1. Elsődleges ingyenes, CORS-engedélyezett deviza API
+                const res = await fetch('https://open.er-api.com/v6/latest/EUR');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.rates && data.rates.HUF) {
+                        EUR_HUF_RATE = Math.round(data.rates.HUF * 100) / 100;
+                        eurRateSourceLabel = 'Élő deviza API';
+                        updateEurRateUI();
+                        updatePositionCalculator();
+                        if (showToastMsg) {
+                            showToast(`Élő EUR/HUF árfolyam frissítve: ${formatNumber(EUR_HUF_RATE, 2)} Ft`, 'success');
+                        }
+                        return;
+                    }
+                }
+            } catch (e) {
+                // Csendes fallback a Frankfurter API-ra
+            }
+
+            try {
+                const res2 = await fetch('https://api.frankfurter.app/latest?from=EUR&to=HUF');
+                if (res2.ok) {
+                    const data2 = await res2.json();
+                    if (data2 && data2.rates && data2.rates.HUF) {
+                        EUR_HUF_RATE = Math.round(data2.rates.HUF * 100) / 100;
+                        eurRateSourceLabel = 'Frankfurter EKB API';
+                        updateEurRateUI();
+                        updatePositionCalculator();
+                        if (showToastMsg) {
+                            showToast(`EKB EUR/HUF árfolyam frissítve: ${formatNumber(EUR_HUF_RATE, 2)} Ft`, 'success');
+                        }
+                    }
+                }
+            } catch (e2) {
+                if (showToastMsg) {
+                    showToast(`Alapértelmezett EUR/HUF árfolyam aktív: ${formatNumber(EUR_HUF_RATE, 2)} Ft`, 'info');
+                }
             }
         }
 
@@ -809,11 +830,11 @@
             const val = parseFloat(document.getElementById('custom-eur-rate')?.value);
             if (!isNaN(val) && val > 100) {
                 EUR_HUF_RATE = val;
-                localStorage.setItem('bet_eur_rate_v6', String(EUR_HUF_RATE));
-                const eurFooter = document.getElementById('footer-eur-rate');
-                if (eurFooter) eurFooter.textContent = `${EUR_HUF_RATE} Ft`;
+                eurRateSourceLabel = 'Kézi beállítás';
+                localStorage.setItem('bet_eur_rate_v7', String(EUR_HUF_RATE));
+                updateEurRateUI();
                 renderAllUI();
-                showToast(`EUR/HUF árfolyam frissítve: ${EUR_HUF_RATE} Ft`, 'success');
+                showToast(`EUR/HUF árfolyam beállítva: ${formatNumber(EUR_HUF_RATE, 2)} Ft`, 'success');
             } else {
                 showToast('Kérlek adj meg érvényes EUR/HUF árfolyamot!', 'warning');
             }
@@ -836,10 +857,6 @@
 
         function saveFavorites() {
             localStorage.setItem('bet_favorites_v2', JSON.stringify(favorites));
-        }
-
-        function savePortfolio() {
-            localStorage.setItem('bet_portfolio_v2', JSON.stringify(portfolio));
         }
 
         function saveHistoryLog() {
@@ -927,6 +944,19 @@
 
                 let rawSymbol = cols[0].trim().toUpperCase();
                 if (!rawSymbol) continue;
+
+                // Ha a Stooq CSV-ben benne van az EURHUF devizapár, kiolvassuk belőle a friss EUR/HUF árfolyamot
+                if (rawSymbol === 'EURHUF') {
+                    const fxClose = parseFloat(cols[6]);
+                    const fxOpen = parseFloat(cols[3]);
+                    const fxVal = (!isNaN(fxClose) && fxClose > 200) ? fxClose : fxOpen;
+                    if (!isNaN(fxVal) && fxVal > 200) {
+                        EUR_HUF_RATE = Math.round(fxVal * 100) / 100;
+                        eurRateSourceLabel = 'Stooq CSV (EURHUF)';
+                        updateEurRateUI();
+                    }
+                    continue;
+                }
 
                 // Ticker alias feloldás (pl. RICHTER.HU -> RICHT.HU, MTELEKOM.HU -> MTEL.HU, DUNA.HU -> DHGROUP.HU)
                 if (SYMBOL_ALIASES[rawSymbol]) {
@@ -1109,16 +1139,62 @@
         }
 
         /***********************************************************************
-         * 4. FELÜLET RENDERELÉSE (BUX SÁV, TÁBLÁZAT, KÁRTYÁK, GRAFIKON, HŐTÉRKÉP)
+         * 4. FELÜLET RENDERELÉSE (BUX SÁV, KPI KÁRTYÁK, TÁBLÁZAT, GRAFIKON, HŐTÉRKÉP)
          ***********************************************************************/
         function renderAllUI() {
             renderBuxHero();
+            renderMarketKpiBar();
             renderStockList();
             renderDetailPanel();
             renderHeatmap();
-            populatePortfolioSelect();
-            renderPortfolio();
+            updateEurRateUI();
             lucide.createIcons();
+        }
+
+        function renderMarketKpiBar() {
+            const shares = stocksList.filter(s => !s.isIndex);
+            if (shares.length === 0) return;
+
+            let totalTurnoverHuf = 0;
+            let activeTradedCount = 0;
+            let topGainer = shares[0];
+            let topLoser = shares[0];
+
+            shares.forEach(s => {
+                const fx = s.currency === 'EUR' ? EUR_HUF_RATE : 1;
+                const valHuf = (s.turnoverValue || 0) * fx;
+                totalTurnoverHuf += valHuf;
+                if (s.volume > 0) activeTradedCount++;
+
+                if (s.changePercent > topGainer.changePercent) topGainer = s;
+                if (s.changePercent < topLoser.changePercent) topLoser = s;
+            });
+
+            const turnoverEl = document.getElementById('kpi-total-turnover');
+            if (turnoverEl) turnoverEl.textContent = formatCompactCurrency(totalTurnoverHuf, 'Ft');
+
+            const activeEl = document.getElementById('kpi-active-count');
+            if (activeEl) activeEl.textContent = `${activeTradedCount} aktív kötésű / ${shares.length} részvény`;
+
+            if (topGainer) {
+                const gSign = topGainer.changePercent > 0 ? '+' : '';
+                document.getElementById('kpi-top-gainer').textContent = `${topGainer.displayTicker || topGainer.symbol} (${gSign}${topGainer.changePercent.toFixed(2)}%)`;
+                document.getElementById('kpi-top-gainer-sub').textContent = `${formatNumber(topGainer.price, getDecimalsForItem(topGainer))} ${topGainer.currency} • ${topGainer.name}`;
+                document.getElementById('kpi-top-gainer-card').dataset.symbol = topGainer.symbol;
+            }
+
+            if (topLoser) {
+                const lSign = topLoser.changePercent > 0 ? '+' : '';
+                document.getElementById('kpi-top-loser').textContent = `${topLoser.displayTicker || topLoser.symbol} (${lSign}${topLoser.changePercent.toFixed(2)}%)`;
+                document.getElementById('kpi-top-loser-sub').textContent = `${formatNumber(topLoser.price, getDecimalsForItem(topLoser))} ${topLoser.currency} • ${topLoser.name}`;
+                document.getElementById('kpi-top-loser-card').dataset.symbol = topLoser.symbol;
+            }
+        }
+
+        function selectTopMover(type) {
+            const cardId = type === 'gainer' ? 'kpi-top-gainer-card' : 'kpi-top-loser-card';
+            const sym = document.getElementById(cardId)?.dataset?.symbol;
+            if (sym) selectTicker(sym);
         }
 
         function renderBuxHero() {
@@ -1468,23 +1544,6 @@
             }
         }
 
-        function prefillPortfolioFromCalc() {
-            const item = stockMap[selectedTicker];
-            if (!item || item.isIndex) {
-                showToast('A BUX index közvetlenül nem adható a részvényportfólióhoz.', 'warning');
-                return;
-            }
-            const budget = parseFloat(document.getElementById('calc-budget')?.value) || 0;
-            const unitPriceInHuf = item.currency === 'EUR' ? item.price * EUR_HUF_RATE : item.price;
-            const shares = Math.max(1, Math.floor(budget / unitPriceInHuf));
-
-            document.getElementById('pf-ticker').value = item.symbol;
-            document.getElementById('pf-qty').value = shares;
-            document.getElementById('pf-buy-price').value = item.price;
-            document.getElementById('pf-qty').focus();
-            showToast(`${item.symbol} (${shares} db @ ${item.price} ${item.currency}) előkészítve a portfólió űrlapon!`, 'info');
-        }
-
         function renderPriceChart(item) {
             const canvas = document.getElementById('priceChart');
             if (!canvas) return;
@@ -1602,216 +1661,7 @@
         }
 
         /***********************************************************************
-         * 7. SAJÁT PORTFÓLIÓ KEZELÉS (LOCALSTORAGE + EUR/HUF TÁMOGATÁS)
-         ***********************************************************************/
-        function populatePortfolioSelect() {
-            const select = document.getElementById('pf-ticker');
-            if (!select) return;
-            const currentVal = select.value;
-
-            const tradable = stocksList.filter(s => !s.isIndex);
-            select.innerHTML = tradable.map(s => {
-                const tag = s.category === 'xtend' ? ' [Xtend]' : '';
-                return `<option value="${s.symbol}">${s.symbol} — ${s.name} (${s.currency})${tag}</option>`;
-            }).join('');
-
-            if (currentVal && stockMap[currentVal]) {
-                select.value = currentVal;
-            }
-        }
-
-        function handlePortfolioAdd(event) {
-            event.preventDefault();
-            const symbol = document.getElementById('pf-ticker').value;
-            const qty = parseFloat(document.getElementById('pf-qty').value);
-            const buyPrice = parseFloat(document.getElementById('pf-buy-price').value);
-
-            if (!symbol || isNaN(qty) || qty <= 0 || isNaN(buyPrice) || buyPrice <= 0) {
-                showToast('Kérlek adj meg érvényes darabszámot és vételi árat!', 'warning');
-                return;
-            }
-
-            const existing = portfolio.find(p => p.symbol === symbol);
-            if (existing) {
-                const totalCost = (existing.qty * existing.buyPrice) + (qty * buyPrice);
-                const newQty = existing.qty + qty;
-                existing.buyPrice = Math.round((totalCost / newQty) * 100) / 100;
-                existing.qty = newQty;
-                showToast(`${symbol} pozíció átlagolva (${newQty} db).`, 'success');
-            } else {
-                portfolio.push({
-                    id: 'pf-' + Date.now(),
-                    symbol,
-                    qty,
-                    buyPrice
-                });
-                showToast(`${symbol} hozzáadva a saját portfólióhoz!`, 'success');
-            }
-
-            savePortfolio();
-            renderPortfolio();
-            event.target.reset();
-        }
-
-        function removePortfolioItem(id) {
-            portfolio = portfolio.filter(p => p.id !== id);
-            savePortfolio();
-            renderPortfolio();
-            showToast('Pozíció törölve a portfólióból.', 'info');
-        }
-
-        function renderPortfolio() {
-            const tbody = document.getElementById('portfolio-table-body');
-            if (!tbody) return;
-
-            if (portfolio.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-500">A portfóliód még üres. Adj hozzá BÉT részvényt a fenti űrlappal!</td></tr>`;
-                document.getElementById('portfolio-total-value').textContent = '0 Ft';
-                document.getElementById('portfolio-total-pl').textContent = '0 Ft (0.00%)';
-                document.getElementById('portfolio-day-change').textContent = '0 Ft';
-                document.getElementById('portfolio-allocation-bar').innerHTML = '';
-                document.getElementById('portfolio-allocation-legend').innerHTML = '';
-                return;
-            }
-
-            let totalMarketValueHuf = 0;
-            let totalCostValueHuf = 0;
-            let totalDayChangeHuf = 0;
-            const allocations = [];
-
-            const rowsHtml = portfolio.map(pos => {
-                // Kompatibilitás: ha valaki korábban .BD-vel mentette el, átkonvertáljuk .HU-ra
-                const normSymbol = pos.symbol.replace('.BD', '.HU').toUpperCase();
-                const stock = stockMap[normSymbol];
-                const currentPrice = stock ? stock.price : pos.buyPrice;
-                const dayChangePerShare = stock ? stock.change : 0;
-                const currency = stock ? stock.currency : 'HUF';
-                const decimals = stock ? getDecimalsForItem(stock) : 0;
-                const fxRate = currency === 'EUR' ? EUR_HUF_RATE : 1;
-
-                const marketValNative = pos.qty * currentPrice;
-                const costValNative = pos.qty * pos.buyPrice;
-                const plValNative = marketValNative - costValNative;
-                const plPct = costValNative > 0 ? (plValNative / costValNative) * 100 : 0;
-
-                const marketValHuf = marketValNative * fxRate;
-                const costValHuf = costValNative * fxRate;
-                const dayChangeValHuf = pos.qty * dayChangePerShare * fxRate;
-
-                totalMarketValueHuf += marketValHuf;
-                totalCostValueHuf += costValHuf;
-                totalDayChangeHuf += dayChangeValHuf;
-
-                allocations.push({ symbol: normSymbol, value: marketValHuf });
-
-                const isPos = plValNative >= 0;
-                const sign = isPos ? '+' : '';
-                const plColor = isPos ? 'text-emerald-400' : 'text-rose-400';
-                const unitLabel = currency === 'EUR' ? 'EUR' : 'Ft';
-
-                return `
-                    <tr class="hover:bg-slate-800/40 transition">
-                        <td class="py-2.5 pl-4 pr-2 font-mono font-bold text-white cursor-pointer hover:text-blue-400" onclick="selectTicker('${normSymbol}')">
-                            ${normSymbol}
-                        </td>
-                        <td class="py-2.5 px-2 text-right font-mono text-slate-200">${formatNumber(pos.qty, 0)} db</td>
-                        <td class="py-2.5 px-2 text-right font-mono text-slate-400">${formatNumber(pos.buyPrice, decimals)} ${unitLabel}</td>
-                        <td class="py-2.5 px-2 text-right font-mono text-white font-semibold">${formatNumber(currentPrice, decimals)} ${unitLabel}</td>
-                        <td class="py-2.5 px-2 text-right font-mono font-bold text-white">
-                            ${formatNumber(marketValHuf, 0)} Ft
-                            ${currency === 'EUR' ? `<div class="text-[10px] text-amber-300 font-normal">(${formatNumber(marketValNative, 1)} EUR)</div>` : ''}
-                        </td>
-                        <td class="py-2.5 px-2 text-right font-mono font-semibold ${plColor}">
-                            ${sign}${formatNumber(plValNative * fxRate, 0)} Ft (${sign}${plPct.toFixed(2)}%)
-                        </td>
-                        <td class="py-2.5 pl-2 pr-4 text-right">
-                            <button onclick="removePortfolioItem('${pos.id}')" class="text-slate-500 hover:text-rose-400 p-1 transition" title="Törlés">
-                                <i data-lucide="trash-2" class="w-4 h-4 inline"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-
-            tbody.innerHTML = rowsHtml;
-
-            const totalPL = totalMarketValueHuf - totalCostValueHuf;
-            const totalPLPct = totalCostValueHuf > 0 ? (totalPL / totalCostValueHuf) * 100 : 0;
-            const plSign = totalPL >= 0 ? '+' : '';
-            const daySign = totalDayChangeHuf >= 0 ? '+' : '';
-
-            document.getElementById('portfolio-total-value').textContent = `${formatNumber(totalMarketValueHuf, 0)} Ft`;
-
-            const plEl = document.getElementById('portfolio-total-pl');
-            plEl.textContent = `${plSign}${formatNumber(totalPL, 0)} Ft (${plSign}${totalPLPct.toFixed(2)}%)`;
-            plEl.className = `font-mono text-sm font-bold ${totalPL >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
-
-            const dayEl = document.getElementById('portfolio-day-change');
-            dayEl.textContent = `${daySign}${formatNumber(totalDayChangeHuf, 0)} Ft`;
-            dayEl.className = `font-mono text-sm font-bold ${totalDayChangeHuf >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
-
-            // Allokációs sáv
-            const barColors = ['bg-blue-500', 'bg-emerald-500', 'bg-amber-500', 'bg-purple-500', 'bg-cyan-500', 'bg-rose-500'];
-            const barEl = document.getElementById('portfolio-allocation-bar');
-            const legendEl = document.getElementById('portfolio-allocation-legend');
-
-            barEl.innerHTML = allocations.map((a, i) => {
-                const w = totalMarketValueHuf > 0 ? (a.value / totalMarketValueHuf) * 100 : 0;
-                const col = barColors[i % barColors.length];
-                return `<div class="${col} h-full" style="width: ${w.toFixed(1)}%" title="${a.symbol}: ${w.toFixed(1)}%"></div>`;
-            }).join('');
-
-            legendEl.innerHTML = allocations.map((a, i) => {
-                const w = totalMarketValueHuf > 0 ? (a.value / totalMarketValueHuf) * 100 : 0;
-                const dotCol = barColors[i % barColors.length];
-                return `<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full ${dotCol}"></span>${a.symbol.replace('.HU','')}: ${w.toFixed(1)}%</span>`;
-            }).join('');
-
-            lucide.createIcons();
-        }
-
-        function exportPortfolioJson() {
-            const dataStr = JSON.stringify(portfolio, null, 2);
-            const blob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'bet_portfolio_mentes.json';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            showToast('Portfólió JSON sikeresen letöltve!', 'success');
-        }
-
-        function importPortfolioPrompt() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            input.onchange = (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    try {
-                        const parsed = JSON.parse(ev.target.result);
-                        if (Array.isArray(parsed)) {
-                            portfolio = parsed;
-                            savePortfolio();
-                            renderPortfolio();
-                            showToast('Portfólió JSON sikeresen betöltve!', 'success');
-                        }
-                    } catch (err) {
-                        showToast('Hibás JSON fájl formátum!', 'warning');
-                    }
-                };
-                reader.readAsText(file);
-            };
-            input.click();
-        }
-
-        /***********************************************************************
-         * 8. TECHNIKAI ESZKÖZÖK, MANUÁLIS CSV TESZTELÉS ÉS SEGÉDFÜGGVÉNYEK
+         * 7. TECHNIKAI ESZKÖZÖK, MANUÁLIS CSV TESZTELÉS ÉS SEGÉDFÜGGVÉNYEK
          ***********************************************************************/
         function saveCsvUrlAndReload() {
             const val = document.getElementById('custom-csv-url').value.trim() || './bet_data.csv';
