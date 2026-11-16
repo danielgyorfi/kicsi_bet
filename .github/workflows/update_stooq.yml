@@ -3,9 +3,11 @@ name: Stooq Adatfrissites es Pages Deploy
 on:
   push:
     branches: [ main, master ]
+    paths-ignore:
+      - 'bet_data.csv'
   schedule:
-    # Hétfőtől péntekig, tőzsdei nyitvatartás alatt 15 percenként
-    - cron: '*/15 8-16 * * 1-5'
+    # Hétfőtől péntekig, UTC 7:00 és 16:59 között (magyar idő szerint 8:00 - 17:59) 10 percenként
+    - cron: '2,12,22,32,42,52 7-16 * * 1-5'
   workflow_dispatch:
 
 permissions:
@@ -13,7 +15,6 @@ permissions:
   pages: write
   id-token: write
 
-# Megakadályozza, hogy két futás megszakítsa egymást ("operation was canceled" hiba ellen)
 concurrency:
   group: "pages"
   cancel-in-progress: false
@@ -37,7 +38,7 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add bet_data.csv
-          git diff --staged --quiet || (git commit -m "Auto-update BET data [skip ci]" && git push)
+          git diff --staged --quiet || (git commit -m "Auto-update BET data" && git push)
 
       - name: GitHub Pages beallitasa
         uses: actions/configure-pages@v5
