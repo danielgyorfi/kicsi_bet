@@ -4,8 +4,7 @@ on:
   push:
     branches: [ main, master ]
   schedule:
-    # Hétfőtől péntekig, UTC 7:00 és 16:59 között (magyar idő szerint 8:00 - 17:59)
-    - cron: '*/10 7-16 * * 1-5'
+    - cron: '*/15 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -60,7 +59,6 @@ jobs:
           rows = ["Symbol,Date,Time,Open,High,Low,Close,Volume,Name"]
           stooq_ok = False
 
-          # 1. Kiserlet: Stooq lekerdezes 15-os csomagokban, URL-kodolva
           stooq_lines = []
           for i in range(0, len(TICKERS), 15):
               chunk = TICKERS[i:i+15]
@@ -84,7 +82,6 @@ jobs:
           else:
               print("Stooq blokkolta a GitHub IP-t vagy ures valaszt adott, atvaltas Yahoo Finance (.BD) lekerdezesre...")
 
-          # 2. Kiserlet (ha a Stooq tiltja az adatközponti IP-t): Yahoo Finance .BD vegpontok
           if not stooq_ok:
               YF_MAP = {
                   "^bux": "^BUX",
