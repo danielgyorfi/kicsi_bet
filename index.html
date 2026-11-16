@@ -88,7 +88,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="text-lg font-bold tracking-tight text-white">BÉT Monitor</h1>
-                        <span class="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">Élő Terminál • v13</span>
+                        <span class="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">Élő Terminál • v14</span>
                     </div>
                     <p class="text-xs text-slate-400">Teljes BÉT Paletta: Blue-Chip, Mid-Cap & Xtend</p>
                 </div>
@@ -524,6 +524,15 @@
                                 </button>
                             </div>
                         </div>
+                        <div class="flex items-center justify-between bg-slate-950/80 border border-slate-800 px-3 py-2 rounded-lg">
+                            <div>
+                                <span class="text-[11px] font-semibold text-slate-200 block">Böngészős Élő Proxy (AllOrigins JSON)</span>
+                                <span class="text-[10px] text-slate-500">Közvetlen Stooq/Yahoo frissítés (corsproxy.io nélkül)</span>
+                            </div>
+                            <button id="toggle-live-proxy-btn" onclick="toggleExternalLiveProxy()" class="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition">
+                                BE
+                            </button>
+                        </div>
                     </div>
                     <div class="pt-3 border-t border-slate-800 flex items-center justify-between">
                         <span class="text-[11px] text-slate-400">Oldal mentése GitHub-ra:</span>
@@ -568,7 +577,7 @@
         <!-- Verziószám és GitHub Pages Deploy Állapotsor -->
         <div class="flex flex-wrap items-center justify-between gap-2 px-2 text-[11px] text-slate-500 font-mono">
             <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-emerald-400 font-bold">Verzió: v13</span>
+                <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-emerald-400 font-bold">Verzió: v14</span>
                 <span>•</span>
                 <span>Teljes BÉT Paletta: Blue-Chip, Mid-Cap & Xtend</span>
             </div>
@@ -712,13 +721,10 @@
         let dataSourceMode = 'loading'; // 'live_browser' | 'github_csv' | 'manual_csv' | 'demo_fallback'
         let priceChartInstance = null;
         let csvFileCreatedLabel = '--'; // A CSV fájl vagy élő lekérdezés tényleges keletkezési ideje
+        let useExternalBrowserProxy = true; // Technikai eszközökben ki/bekapcsolható külső élő lekérdezés
 
-        // CORS hidak közvetlen böngészős Stooq / Yahoo Finance lekérdezéshez
-        const CORS_PROXIES = [
-            (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-            (url) => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
-            (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
-        ];
+        // Közvetlen GitHub Raw CSV URL (corsproxy nélkül, natív CORS támogatással)
+        const GITHUB_RAW_CSV_URL = 'https://raw.githubusercontent.com/danielgyorfi/kicsi_bet/main/bet_data.csv';
 
         const LIVE_STOOQ_CHUNKS = [
             '^bux+eurhuf+otp.hu+mol.hu+richt.hu+mtel.hu+4ig.hu+akko.hu+alteo.hu+amixa.hu+any.hu+appeninn.hu+autowallis.hu+bet.hu+bgreit.hu+bif.hu+cigpannonia.hu+civita.hu+delta.hu+dhgroup.hu+dmker.hu+enefi.hu+enefiels.hu+eproliusia.hu+esense.hu+finext.hu+finextb.hu',
@@ -736,8 +742,9 @@
             setCategoryFilter('favorites');
             updateMarketStatusUI();
             updateEurRateUI();
+            updateLiveProxyBtnUI();
 
-            // Hibrid adatbetöltés: 1. helyi CSV azonnal -> 2. közvetlen böngészős élő lekérdezés
+            // Hibrid adatbetöltés: 1. helyi / GitHub Raw CSV azonnal -> 2. opcionális böngészős élő lekérdezés
             loadCsvData(false);
 
             // Élő EUR/HUF árfolyam lekérése ingyenes CORS-képes API-ról
@@ -771,6 +778,11 @@
                     eurRateSourceLabel = 'Mentett árfolyam';
                 }
 
+                const savedProxyPref = localStorage.getItem('bet_live_proxy_v14');
+                if (savedProxyPref !== null) {
+                    useExternalBrowserProxy = savedProxyPref === 'true';
+                }
+
                 const savedFavs = localStorage.getItem('bet_favorites_v2');
                 if (savedFavs) {
                     const parsedFavs = JSON.parse(savedFavs);
@@ -786,6 +798,30 @@
             } catch (err) {
                 console.error('LocalStorage olvasási hiba:', err);
             }
+        }
+
+        function updateLiveProxyBtnUI() {
+            const btn = document.getElementById('toggle-live-proxy-btn');
+            if (!btn) return;
+            if (useExternalBrowserProxy) {
+                btn.textContent = 'BE';
+                btn.className = 'px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition';
+            } else {
+                btn.textContent = 'KI (Csak CSV)';
+                btn.className = 'px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-slate-800 text-slate-400 border border-slate-700 transition';
+            }
+        }
+
+        function toggleExternalLiveProxy() {
+            useExternalBrowserProxy = !useExternalBrowserProxy;
+            localStorage.setItem('bet_live_proxy_v14', String(useExternalBrowserProxy));
+            updateLiveProxyBtnUI();
+            showToast(
+                useExternalBrowserProxy
+                    ? 'Böngészős élő proxy (AllOrigins JSON) bekapcsolva.'
+                    : 'Külső proxy kikapcsolva: csak a helyi és GitHub CSV fájlokat használjuk.',
+                'info'
+            );
         }
 
         function updateEurRateUI() {
@@ -905,25 +941,59 @@
             updateCountdownUI();
 
             try {
-                // 1. LÉPÉS: Gyors alapbetöltés a ./bet_data.csv-ből (hogy 100ms alatt megjelenjen a táblázat)
-                let baseLoaded = false;
+                // 1. LÉPÉS: Helyi ./bet_data.csv ÉS közvetlen GitHub Raw CSV lekérése (harmadik fél proxy nélkül!)
+                let bestCsvText = null;
+                let bestLastMod = null;
+                let bestTimestamp = '';
+
+                const extractTimestampFromCsv = (txt) => {
+                    if (!txt) return '';
+                    const genMatch = txt.match(/#GENERATED_AT,([^,\r\n]+),([^\r\n]+)/);
+                    if (genMatch) return `${genMatch[1].trim()} ${genMatch[2].trim()}`;
+                    return '';
+                };
+
+                // 1/A: Helyi ./bet_data.csv ellenőrzése
                 try {
                     const sep = csvUrl.includes('?') ? '&' : '?';
-                    const targetUrl = `${csvUrl}${sep}t=${Date.now()}`;
-                    const response = await fetch(targetUrl, { cache: 'no-store' });
-                    if (response.ok) {
-                        const lastModifiedHeader = response.headers.get('Last-Modified');
-                        const csvText = await response.text();
-                        const parsedCount = parseStooqCsv(csvText, lastModifiedHeader);
-                        if (parsedCount > 0) {
-                            baseLoaded = true;
-                            dataSourceMode = 'github_csv';
-                            updateHeaderStatusUI();
-                            renderAllUI();
+                    const localTarget = `${csvUrl}${sep}_t=${Date.now()}`;
+                    const resLocal = await fetch(localTarget, { cache: 'no-store' });
+                    if (resLocal.ok) {
+                        const txt = await resLocal.text();
+                        if (txt && txt.includes('Symbol,Date') && !txt.includes('<title>Stooq</title>')) {
+                            bestCsvText = txt;
+                            bestLastMod = resLocal.headers.get('Last-Modified');
+                            bestTimestamp = extractTimestampFromCsv(txt);
                         }
                     }
-                } catch (csvErr) {
-                    // Csendes továbbhaladás a minta + élő lekérdezésre
+                } catch (e) {}
+
+                // 1/B: Közvetlen GitHub Raw CSV ellenőrzése (ha frissebb, mint a Pages CDN gyorsítótár)
+                try {
+                    const rawTarget = `${GITHUB_RAW_CSV_URL}?_t=${Date.now()}`;
+                    const resRaw = await fetch(rawTarget, { cache: 'no-store' });
+                    if (resRaw.ok) {
+                        const rawTxt = await resRaw.text();
+                        if (rawTxt && rawTxt.includes('Symbol,Date') && !rawTxt.includes('<title>Stooq</title>')) {
+                            const rawTs = extractTimestampFromCsv(rawTxt);
+                            if (!bestCsvText || (rawTs && rawTs > bestTimestamp)) {
+                                bestCsvText = rawTxt;
+                                bestLastMod = resRaw.headers.get('Last-Modified') || bestLastMod;
+                                bestTimestamp = rawTs;
+                            }
+                        }
+                    }
+                } catch (e) {}
+
+                let baseLoaded = false;
+                if (bestCsvText) {
+                    const parsedCount = parseStooqCsv(bestCsvText, bestLastMod);
+                    if (parsedCount > 0) {
+                        baseLoaded = true;
+                        dataSourceMode = 'github_csv';
+                        updateHeaderStatusUI();
+                        renderAllUI();
+                    }
                 }
 
                 if (!baseLoaded && stocksList.length === 0) {
@@ -933,8 +1003,11 @@
                     renderAllUI();
                 }
 
-                // 2. LÉPÉS: Közvetlen böngészős élő lekérdezés (Stooq + Yahoo Finance .BD tartalék)
-                const liveUpdatedCount = await fetchLiveBrowserQuotes();
+                // 2. LÉPÉS: Opcionális közvetlen böngészős élő lekérdezés (AllOrigins JSON HTTP 200, corsproxy.io NÉLKÜL)
+                let liveUpdatedCount = 0;
+                if (useExternalBrowserProxy) {
+                    liveUpdatedCount = await fetchLiveBrowserQuotes();
+                }
                 lastLiveFetchTime = Date.now();
 
                 if (liveUpdatedCount > 0) {
@@ -944,7 +1017,7 @@
                     updateHeaderStatusUI();
                     renderAllUI();
                     if (showNotification) {
-                        showToast(`Élő tőzsdei árfolyamok frissítve közvetlenül a böngészőből (${liveUpdatedCount} papír)!`, 'success');
+                        showToast(`Élő árfolyamok frissítve (${liveUpdatedCount} instrumentum)!`, 'success');
                     }
                 } else if (baseLoaded) {
                     if (showNotification) {
@@ -959,23 +1032,23 @@
             }
         }
 
-        async function fetchWithCorsFallback(targetUrl, timeoutMs = 6500) {
-            for (const buildProxyUrl of CORS_PROXIES) {
-                const controller = new AbortController();
-                const timer = setTimeout(() => controller.abort(), timeoutMs);
-                try {
-                    const proxyUrl = buildProxyUrl(targetUrl);
-                    const res = await fetch(proxyUrl, { signal: controller.signal, cache: 'no-store' });
-                    clearTimeout(timer);
-                    if (res.ok) {
-                        const text = await res.text();
-                        if (text && text.length > 15 && !text.includes('<title>Stooq</title>') && !text.includes('does not exist')) {
-                            return text;
-                        }
+        // Kizárólag 200 OK JSON választ adó AllOrigins végpont (corsproxy.io teljesen eltávolítva!)
+        async function fetchWithCorsFallback(targetUrl, timeoutMs = 6000) {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const jsonProxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&_t=${Date.now()}`;
+                const res = await fetch(jsonProxyUrl, { signal: controller.signal, cache: 'no-store' });
+                clearTimeout(timer);
+                if (res.ok) {
+                    const data = await res.json();
+                    const text = data && typeof data.contents === 'string' ? data.contents : '';
+                    if (text && text.length > 15 && !text.includes('<title>Stooq</title>') && !text.includes('does not exist')) {
+                        return text;
                     }
-                } catch (e) {
-                    clearTimeout(timer);
                 }
+            } catch (e) {
+                clearTimeout(timer);
             }
             return null;
         }
