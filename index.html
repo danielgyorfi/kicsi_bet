@@ -76,13 +76,13 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="text-lg font-bold tracking-tight text-white">BÉT Monitor</h1>
-                        <span class="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">Stooq CSV • v11</span>
+                        <span class="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">Élő Terminál • v12</span>
                     </div>
                     <p class="text-xs text-slate-400">Teljes BÉT Paletta: Blue-Chip, Mid-Cap & Xtend</p>
                 </div>
             </div>
 
-            <!-- Középső Piaci Állapot & CSV Készült Sáv -->
+            <!-- Középső Piaci Állapot & Adatok Frissítve Sáv -->
             <div class="flex flex-wrap items-center gap-3 bg-slate-900/90 border border-slate-800 px-3.5 py-2 rounded-xl">
                 <div class="flex items-center gap-2">
                     <span id="market-dot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
@@ -94,18 +94,19 @@
                 <span class="text-slate-700 hidden sm:inline">|</span>
                 <div class="flex items-center gap-1.5 text-xs">
                     <i data-lucide="file-clock" class="w-3.5 h-3.5 text-emerald-400"></i>
-                    <span class="text-slate-400">CSV készült:</span>
+                    <span class="text-slate-400">Adatok / CSV készült:</span>
                     <strong id="header-csv-created" class="font-mono text-emerald-300">--</strong>
                 </div>
             </div>
 
             <!-- Jobb oldali vezérlőgombok -->
             <div class="flex items-center gap-2 flex-wrap">
-                <!-- Auto-refresh 60mp -->
-                <button onclick="toggleAutoRefresh()" class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-800/90 hover:bg-slate-800 text-slate-300 border border-slate-700 transition" title="60 másodpercenként újraolvassa a bet_data.csv fájlt">
+                <!-- Auto-refresh 5 perc (300 mp) visszaszámlálóval -->
+                <button onclick="toggleAutoRefresh()" class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-800/90 hover:bg-slate-800 text-slate-300 border border-slate-700 transition" title="5 percenként automatikus élő árfolyam-lekérdezés közvetlenül a böngészőből">
                     <i data-lucide="timer" class="w-4 h-4 text-emerald-400"></i>
-                    <span class="hidden md:inline">Auto (60mp):</span>
+                    <span>Auto 5p:</span>
                     <span id="auto-refresh-status" class="font-mono text-emerald-400 font-semibold">BE</span>
+                    <span id="auto-countdown-badge" class="font-mono text-[11px] px-1.5 py-0.2 rounded bg-slate-950/80 text-slate-300 border border-slate-700/80">05:00</span>
                 </button>
 
                 <!-- Kézi frissítés -->
@@ -555,12 +556,12 @@
         <!-- Verziószám és GitHub Pages Deploy Állapotsor -->
         <div class="flex flex-wrap items-center justify-between gap-2 px-2 text-[11px] text-slate-500 font-mono">
             <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-emerald-400 font-bold">Verzió: v11</span>
+                <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-emerald-400 font-bold">Verzió: v12</span>
                 <span>•</span>
                 <span>Teljes BÉT Paletta: Blue-Chip, Mid-Cap & Xtend</span>
             </div>
             <div class="flex flex-wrap items-center gap-2">
-                <span>CSV készült: <strong id="footer-csv-created" class="text-emerald-400">--</strong></span>
+                <span>Adatok / CSV készült: <strong id="footer-csv-created" class="text-emerald-400">--</strong></span>
                 <span>•</span>
                 <span>Böngésző szinkron: <strong id="footer-sync-time" class="text-slate-400">--:--:--</strong></span>
                 <span>•</span>
@@ -693,9 +694,25 @@
         let priceHistoryLog = {};   // symbol -> [{ time, price }] (localStorage-ban épülő idősor)
         let isAutoRefresh = true;
         let autoRefreshTimer = null;
-        let dataSourceMode = 'loading'; // 'github_csv' | 'manual_csv' | 'demo_fallback'
+        let countdownSeconds = 300; // 5 perc = 300 másodperc
+        let lastLiveFetchTime = 0;
+        let isRefreshingNow = false;
+        let dataSourceMode = 'loading'; // 'live_browser' | 'github_csv' | 'manual_csv' | 'demo_fallback'
         let priceChartInstance = null;
-        let csvFileCreatedLabel = '--'; // A CSV fájl tényleges keletkezési / adatállapot ideje
+        let csvFileCreatedLabel = '--'; // A CSV fájl vagy élő lekérdezés tényleges keletkezési ideje
+
+        // CORS hidak közvetlen böngészős Stooq / Yahoo Finance lekérdezéshez
+        const CORS_PROXIES = [
+            (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+            (url) => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
+            (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+        ];
+
+        const LIVE_STOOQ_CHUNKS = [
+            '^bux+eurhuf+otp.hu+mol.hu+richt.hu+mtel.hu+4ig.hu+akko.hu+alteo.hu+amixa.hu+any.hu+appeninn.hu+autowallis.hu+bet.hu+bgreit.hu+bif.hu+cigpannonia.hu+civita.hu+delta.hu+dhgroup.hu+dmker.hu+enefi.hu+enefiels.hu+eproliusia.hu+esense.hu+finext.hu+finextb.hu',
+            'forrasoe.hu+forrast.hu+futuraqua.hu+gloster.hu+goodwillphrm.hu+granit.hu+gspark.hu+masterplast.hu+mbhbank.hu+mbhjb.hu+megakran.hu+nordgeneral.hu+nutex.hu+opus.hu+ormester.hu+pannergy.hu+pensum.hu+raba.hu+splus.hu+strt.hu+sundell.hu+ubm.hu+uplaza.hu+vertikal.hu+vig.hu+waberers.hu+zwack.hu',
+            'astrasun.hu+biggeorge.hu+cdsys.hu+chome.hu+coolklima.hu+deltakamatoz.hu+energyinvest.hu+epduferr.hu+glia.hu+gopd.hu+kermannit.hu+metmax.hu+multihome.hu+nap.hu+naturland.hu+navigator.hu+o3pnrs.hu+polyduct.hu+valberg.hu+vvt.hu'
+        ];
 
         /***********************************************************************
          * 2. INICIALIZÁLÁS ÉS LOCALSTORAGE BETÖLTÉS
@@ -708,15 +725,22 @@
             updateMarketStatusUI();
             updateEurRateUI();
 
-            // CSV adat betöltése (először megpróbálja a ./bet_data.csv-t)
+            // Hibrid adatbetöltés: 1. helyi CSV azonnal -> 2. közvetlen böngészős élő lekérdezés
             loadCsvData(false);
 
             // Élő EUR/HUF árfolyam lekérése ingyenes CORS-képes API-ról
             fetchLiveEurHufRate(false);
 
-            // Időzítők indítása
+            // 5 perces (300 mp) automatikus időzítő és másodperces visszaszámláló indítása
             startAutoRefreshTimer();
             setInterval(updateMarketStatusUI, 30000);
+
+            // Ha a lap inaktív volt és a felhasználó visszalép rá, és már eltelt 5 perc, azonnal frissítünk
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden && isAutoRefresh && (Date.now() - lastLiveFetchTime >= 300000)) {
+                    loadCsvData(false);
+                }
+            });
         });
 
         function loadLocalStorageState() {
@@ -862,17 +886,180 @@
         }
 
         async function loadCsvData(showNotification = false) {
+            if (isRefreshingNow) return;
+            isRefreshingNow = true;
             setRefreshSpinner(true);
+            countdownSeconds = 300;
+            updateCountdownUI();
 
             try {
-                // Cache-busting paraméter, hogy a GitHub Pages mindig a legfrissebbet adja
-                const sep = csvUrl.includes('?') ? '&' : '?';
-                const targetUrl = `${csvUrl}${sep}t=${Date.now()}`;
-
-                const response = await fetch(targetUrl, { cache: 'no-store' });
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
+                // 1. LÉPÉS: Gyors alapbetöltés a ./bet_data.csv-ből (hogy 100ms alatt megjelenjen a táblázat)
+                let baseLoaded = false;
+                try {
+                    const sep = csvUrl.includes('?') ? '&' : '?';
+                    const targetUrl = `${csvUrl}${sep}t=${Date.now()}`;
+                    const response = await fetch(targetUrl, { cache: 'no-store' });
+                    if (response.ok) {
+                        const lastModifiedHeader = response.headers.get('Last-Modified');
+                        const csvText = await response.text();
+                        const parsedCount = parseStooqCsv(csvText, lastModifiedHeader);
+                        if (parsedCount > 0) {
+                            baseLoaded = true;
+                            dataSourceMode = 'github_csv';
+                            updateHeaderStatusUI();
+                            renderAllUI();
+                        }
+                    }
+                } catch (csvErr) {
+                    // Csendes továbbhaladás a minta + élő lekérdezésre
                 }
+
+                if (!baseLoaded && stocksList.length === 0) {
+                    parseStooqCsv(FALLBACK_SAMPLE_CSV, null);
+                    dataSourceMode = 'demo_fallback';
+                    updateHeaderStatusUI();
+                    renderAllUI();
+                }
+
+                // 2. LÉPÉS: Közvetlen böngészős élő lekérdezés (Stooq + Yahoo Finance .BD tartalék)
+                const liveUpdatedCount = await fetchLiveBrowserQuotes();
+                lastLiveFetchTime = Date.now();
+
+                if (liveUpdatedCount > 0) {
+                    dataSourceMode = 'live_browser';
+                    const nowBp = formatBudapestTimestamp(new Date());
+                    updateCsvCreatedUI(`${nowBp} (Élő)`);
+                    updateHeaderStatusUI();
+                    renderAllUI();
+                    if (showNotification) {
+                        showToast(`Élő tőzsdei árfolyamok frissítve közvetlenül a böngészőből (${liveUpdatedCount} papír)!`, 'success');
+                    }
+                } else if (baseLoaded) {
+                    if (showNotification) {
+                        showToast('CSV adatok sikeresen frissítve!', 'success');
+                    }
+                } else if (showNotification) {
+                    showToast('Előnézeti minta CSV aktív.', 'info');
+                }
+            } finally {
+                isRefreshingNow = false;
+                setRefreshSpinner(false);
+            }
+        }
+
+        async function fetchWithCorsFallback(targetUrl, timeoutMs = 6500) {
+            for (const buildProxyUrl of CORS_PROXIES) {
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), timeoutMs);
+                try {
+                    const proxyUrl = buildProxyUrl(targetUrl);
+                    const res = await fetch(proxyUrl, { signal: controller.signal, cache: 'no-store' });
+                    clearTimeout(timer);
+                    if (res.ok) {
+                        const text = await res.text();
+                        if (text && text.length > 15 && !text.includes('<title>Stooq</title>') && !text.includes('does not exist')) {
+                            return text;
+                        }
+                    }
+                } catch (e) {
+                    clearTimeout(timer);
+                }
+            }
+            return null;
+        }
+
+        async function fetchLiveBrowserQuotes() {
+            let combinedCsvLines = ['Symbol,Date,Time,Open,High,Low,Close,Volume,Name'];
+            let stooqSuccessRows = 0;
+
+            // 1. Kísérlet: Stooq CSV közvetlen lekérése 3 csomagban CORS hídon keresztül
+            for (const chunk of LIVE_STOOQ_CHUNKS) {
+                const stooqUrl = `https://stooq.com/q/l/?s=${chunk}&f=sd2t2ohlcvn&h&e=csv&_t=${Date.now()}`;
+                const csvChunkText = await fetchWithCorsFallback(stooqUrl, 5500);
+                if (csvChunkText && csvChunkText.includes('Symbol,Date')) {
+                    const lines = csvChunkText.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+                    for (let i = 1; i < lines.length; i++) {
+                        if (!lines[i].startsWith('Symbol,')) {
+                            combinedCsvLines.push(lines[i]);
+                            stooqSuccessRows++;
+                        }
+                    }
+                }
+            }
+
+            if (stooqSuccessRows >= 5) {
+                const nowBp = formatBudapestTimestamp(new Date());
+                const [dPart, tPart] = nowBp.split(' ');
+                combinedCsvLines.push(`#GENERATED_AT,${dPart},${tPart}`);
+                parseStooqCsv(combinedCsvLines.join('\n'), null);
+                return stooqSuccessRows;
+            }
+
+            // 2. Kísérlet (ha a Stooq korlátozza a CORS proxykat): Yahoo Finance .BD közvetlen élő lekérdezés
+            // Lekérdezzük a BUX-ot, a Blue-Chipeket és a felhasználó összes Kedvencét
+            const priorityTickers = Array.from(new Set([
+                '^BUX', 'OTP.HU', 'MOL.HU', 'RICHT.HU', 'MTEL.HU',
+                '4IG.HU', 'ALTEO.HU', 'ANY.HU', 'AUTOWALLIS.HU', 'CIGPANNONIA.HU',
+                'DELTA.HU', 'DHGROUP.HU', 'GLOSTER.HU', 'GRANIT.HU', 'GSPARK.HU',
+                'MASTERPLAST.HU', 'MBHBANK.HU', 'OPUS.HU', 'PANNERGY.HU', 'RABA.HU',
+                'SPLUS.HU', 'WABERERS.HU', 'ZWACK.HU', 'ASTRASUN.HU', 'NAP.HU',
+                ...favorites
+            ]));
+
+            const YF_MAP = {
+                '^BUX': '^BUX',
+                'MTEL.HU': 'MTEL.BD',
+                'RICHT.HU': 'RICHT.BD',
+                'FORRASOE.HU': 'FORRAS-OE.BD',
+                'FORRAST.HU': 'FORRAS-T.BD'
+            };
+
+            let yfUpdated = 0;
+            const batchSize = 6;
+            for (let i = 0; i < priorityTickers.length; i += batchSize) {
+                const batch = priorityTickers.slice(i, i + batchSize);
+                await Promise.all(batch.map(async (sym) => {
+                    const yfSym = YF_MAP[sym] || sym.replace('.HU', '.BD');
+                    const yfUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yfSym)}?interval=1d&range=2d&_t=${Date.now()}`;
+                    const rawJson = await fetchWithCorsFallback(yfUrl, 5000);
+                    if (!rawJson) return;
+                    try {
+                        const data = JSON.parse(rawJson);
+                        const meta = data?.chart?.result?.[0]?.meta;
+                        if (!meta || !meta.regularMarketPrice) return;
+
+                        const item = stockMap[sym];
+                        if (!item) return;
+
+                        const price = Number(meta.regularMarketPrice);
+                        const prev = Number(meta.chartPreviousClose || meta.previousClose || item.basePrice || item.open);
+                        const high = Number(meta.regularMarketDayHigh || Math.max(price, item.high));
+                        const low  = Number(meta.regularMarketDayLow || Math.min(price, item.low));
+                        const vol  = Number(meta.regularMarketVolume ?? item.volume);
+
+                        item.price = price;
+                        if (prev > 0) item.basePrice = prev;
+                        item.high = high;
+                        item.low = low;
+                        item.volume = vol;
+                        item.turnoverValue = vol * price;
+                        item.change = Math.round((price - item.basePrice) * 10000) / 10000;
+                        item.changePercent = item.basePrice > 0 ? (item.change / item.basePrice) * 100 : 0;
+                        if (high > low) {
+                            item.rangePositionPct = Math.max(0, Math.min(100, ((price - low) / (high - low)) * 100));
+                        }
+                        const nowStr = formatBudapestTimestamp(new Date());
+                        recordPriceHistoryPoint(sym, nowStr, price);
+                        yfUpdated++;
+                    } catch (e) {}
+                }));
+            }
+
+            if (yfUpdated > 0) {
+                saveHistoryLog();
+            }
+            return yfUpdated;
+        }
 
                 // HTTP Last-Modified fejléc kiolvasása (másodlagos időbélyeg forrás)
                 const lastModifiedHeader = response.headers.get('Last-Modified');
@@ -1739,7 +1926,11 @@
             const dot = document.getElementById('source-dot');
             const text = document.getElementById('datasource-text');
 
-            if (dataSourceMode === 'github_csv') {
+            if (dataSourceMode === 'live_browser') {
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse';
+                text.textContent = 'ÉLŐ BÖNGÉSZŐS LEKÉRDEZÉS (5 percenként + CSV)';
+                text.className = 'text-xs font-semibold text-emerald-300';
+            } else if (dataSourceMode === 'github_csv') {
                 dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse';
                 text.textContent = `ÉLES CSV (${csvUrl})`;
                 text.className = 'text-xs font-semibold text-emerald-400';
@@ -1753,24 +1944,46 @@
                 text.className = 'text-xs font-semibold text-amber-300';
             }
         }
-
-        function updateMarketStatusUI() {
-            const now = new Date();
-            const day = now.getDay();
-            const minutes = now.getHours() * 60 + now.getMinutes();
-            const isOpen = day >= 1 && day <= 5 && minutes >= 9 * 60 && minutes < 17 * 60;
-
-            const dot = document.getElementById('market-dot');
-            const label = document.getElementById('market-status-text');
-            if (isOpen) {
-                dot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-ping';
-                label.textContent = 'BÉT Nyitva';
-                label.className = 'text-xs font-semibold text-emerald-400';
-            } else {
-                dot.className = 'w-2 h-2 rounded-full bg-slate-500';
-                label.textContent = 'BÉT Zárva';
-                label.className = 'text-xs font-medium text-slate-400';
+        function updateCountdownUI() {
+            const badge = document.getElementById('auto-countdown-badge');
+            if (!badge) return;
+            if (!isAutoRefresh) {
+                badge.textContent = 'SZÜNET';
+                badge.className = 'font-mono text-[11px] px-1.5 py-0.2 rounded bg-slate-950/80 text-slate-500 border border-slate-800';
+                return;
             }
+            const mins = String(Math.floor(countdownSeconds / 60)).padStart(2, '0');
+            const secs = String(countdownSeconds % 60).padStart(2, '0');
+            badge.textContent = `${mins}:${secs}`;
+            badge.className = 'font-mono text-[11px] px-1.5 py-0.2 rounded bg-slate-950/80 text-emerald-300 border border-slate-700/80';
+        }
+
+        function startAutoRefreshTimer() {
+            if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+            countdownSeconds = 300;
+            updateCountdownUI();
+
+            if (isAutoRefresh) {
+                autoRefreshTimer = setInterval(() => {
+                    if (dataSourceMode === 'manual_csv') return;
+                    countdownSeconds--;
+                    if (countdownSeconds <= 0) {
+                        countdownSeconds = 300;
+                        loadCsvData(false);
+                    }
+                    updateCountdownUI();
+                }, 1000);
+            }
+        }
+
+        function toggleAutoRefresh() {
+            isAutoRefresh = !isAutoRefresh;
+            const statusEl = document.getElementById('auto-refresh-status');
+            statusEl.textContent = isAutoRefresh ? 'BE' : 'KI';
+            statusEl.className = isAutoRefresh ? 'font-mono text-emerald-400 font-semibold' : 'font-mono text-slate-500 font-semibold';
+            startAutoRefreshTimer();
+            showToast(isAutoRefresh ? '5 perces automatikus élő árfolyam-frissítés bekapcsolva.' : 'Automatikus élő frissítés kikapcsolva.', 'info');
+        }
         }
 
         function startAutoRefreshTimer() {
