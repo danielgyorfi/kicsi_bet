@@ -37,6 +37,7 @@ jobs:
           import json
           import time
           from datetime import datetime
+          from zoneinfo import ZoneInfo
 
           TICKERS = [
               "^bux", "eurhuf",
@@ -110,7 +111,7 @@ jobs:
                           low = meta.get("regularMarketDayLow", price)
                           vol = meta.get("regularMarketVolume", 0)
                           ts = meta.get("regularMarketTime", int(time.time()))
-                          dt = datetime.utcfromtimestamp(ts + 3600)
+                          dt = datetime.fromtimestamp(ts, tz=ZoneInfo("Europe/Budapest"))
                           d_str = dt.strftime("%Y-%m-%d")
                           t_str = dt.strftime("%H:%M:%S")
                           rows.append(f"{stooq_sym},{d_str},{t_str},{prev},{high},{low},{price},{vol},{stooq_sym}")
@@ -119,9 +120,11 @@ jobs:
                   time.sleep(0.1)
 
           if len(rows) > 1:
+              now_bp = datetime.now(ZoneInfo("Europe/Budapest"))
+              rows.append(f"#GENERATED_AT,{now_bp.strftime('%Y-%m-%d')},{now_bp.strftime('%H:%M:%S')}")
               with open("bet_data.csv", "w", encoding="utf-8") as f:
                   f.write("\n".join(rows) + "\n")
-              print(f"bet_data.csv sikeresen mentve ({len(rows)-1} instrumentum).")
+              print(f"bet_data.csv sikeresen mentve ({len(rows)-2} instrumentum).")
           EOF
 
       - name: CSV mentese a repoba (ha valtozott)
