@@ -76,20 +76,26 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="text-lg font-bold tracking-tight text-white">BÉT Monitor</h1>
-                        <span class="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">Stooq CSV • v10</span>
+                        <span class="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">Stooq CSV • v11</span>
                     </div>
                     <p class="text-xs text-slate-400">Teljes BÉT Paletta: Blue-Chip, Mid-Cap & Xtend</p>
                 </div>
             </div>
 
-            <!-- Középső Piaci Állapot Sáv -->
-            <div class="hidden sm:flex items-center gap-3 bg-slate-900/90 border border-slate-800 px-3.5 py-2 rounded-xl">
+            <!-- Középső Piaci Állapot & CSV Készült Sáv -->
+            <div class="flex flex-wrap items-center gap-3 bg-slate-900/90 border border-slate-800 px-3.5 py-2 rounded-xl">
                 <div class="flex items-center gap-2">
                     <span id="market-dot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
                     <div class="flex items-center gap-1.5">
                         <span id="market-status-text" class="text-xs font-medium text-slate-200">Piaci állapot</span>
-                        <span class="text-[10px] text-slate-500 font-mono">(H–P 09:00–17:00)</span>
+                        <span class="text-[10px] text-slate-500 font-mono hidden md:inline">(H–P 09:00–17:00)</span>
                     </div>
+                </div>
+                <span class="text-slate-700 hidden sm:inline">|</span>
+                <div class="flex items-center gap-1.5 text-xs">
+                    <i data-lucide="file-clock" class="w-3.5 h-3.5 text-emerald-400"></i>
+                    <span class="text-slate-400">CSV készült:</span>
+                    <strong id="header-csv-created" class="font-mono text-emerald-300">--</strong>
                 </div>
             </div>
 
@@ -332,7 +338,9 @@
 
                 <!-- Lábléc Információ -->
                 <div class="px-4 py-2.5 bg-slate-900/60 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400">
-                    <div class="flex items-center gap-2">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span>CSV készült: <strong id="table-footer-csv-created" class="text-emerald-300 font-mono">--</strong></span>
+                        <span>•</span>
                         <span>Böngésző szinkron: <strong id="last-updated-time" class="text-slate-300 font-mono">--:--:--</strong></span>
                         <span>•</span>
                         <span>Forrás: <code id="footer-csv-path" class="text-emerald-400">./bet_data.csv</code></span>
@@ -547,12 +555,14 @@
         <!-- Verziószám és GitHub Pages Deploy Állapotsor -->
         <div class="flex flex-wrap items-center justify-between gap-2 px-2 text-[11px] text-slate-500 font-mono">
             <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-emerald-400 font-bold">Verzió: v10</span>
+                <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-emerald-400 font-bold">Verzió: v11</span>
                 <span>•</span>
                 <span>Teljes BÉT Paletta: Blue-Chip, Mid-Cap & Xtend</span>
             </div>
-            <div class="flex items-center gap-2">
-                <span>CSV szinkron: <strong id="footer-sync-time" class="text-slate-400">--:--:--</strong></span>
+            <div class="flex flex-wrap items-center gap-2">
+                <span>CSV készült: <strong id="footer-csv-created" class="text-emerald-400">--</strong></span>
+                <span>•</span>
+                <span>Böngésző szinkron: <strong id="footer-sync-time" class="text-slate-400">--:--:--</strong></span>
                 <span>•</span>
                 <span>Alapértelmezett nézet: <strong class="text-slate-400">★ Kedvencek</strong></span>
             </div>
@@ -685,6 +695,7 @@
         let autoRefreshTimer = null;
         let dataSourceMode = 'loading'; // 'github_csv' | 'manual_csv' | 'demo_fallback'
         let priceChartInstance = null;
+        let csvFileCreatedLabel = '--'; // A CSV fájl tényleges keletkezési / adatállapot ideje
 
         /***********************************************************************
          * 2. INICIALIZÁLÁS ÉS LOCALSTORAGE BETÖLTÉS
@@ -863,8 +874,10 @@
                     throw new Error(`HTTP ${response.status}`);
                 }
 
+                // HTTP Last-Modified fejléc kiolvasása (másodlagos időbélyeg forrás)
+                const lastModifiedHeader = response.headers.get('Last-Modified');
                 const csvText = await response.text();
-                const parsedCount = parseStooqCsv(csvText);
+                const parsedCount = parseStooqCsv(csvText, lastModifiedHeader);
 
                 if (parsedCount > 0) {
                     dataSourceMode = 'github_csv';
@@ -878,7 +891,7 @@
                 }
             } catch (err) {
                 // Ha még nincs feltöltve a ./bet_data.csv (pl. előnézeti vásznon fut), betöltjük a minta CSV-t
-                parseStooqCsv(FALLBACK_SAMPLE_CSV);
+                parseStooqCsv(FALLBACK_SAMPLE_CSV, null);
                 dataSourceMode = 'demo_fallback';
                 updateHeaderStatusUI();
                 renderAllUI();
@@ -891,7 +904,37 @@
             }
         }
 
-        function parseStooqCsv(csvText) {
+        function formatBudapestTimestamp(dateObj) {
+            try {
+                const parts = new Intl.DateTimeFormat('sv-SE', {
+                    timeZone: 'Europe/Budapest',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                }).formatToParts(dateObj);
+                const map = {};
+                parts.forEach(p => { map[p.type] = p.value; });
+                return `${map.year}-${map.month}-${map.day} ${map.hour}:${map.minute}:${map.second}`;
+            } catch (e) {
+                return dateObj.toLocaleString('hu-HU');
+            }
+        }
+
+        function updateCsvCreatedUI(labelText) {
+            csvFileCreatedLabel = labelText || '--';
+            const headerEl = document.getElementById('header-csv-created');
+            if (headerEl) headerEl.textContent = csvFileCreatedLabel;
+            const tableFooterEl = document.getElementById('table-footer-csv-created');
+            if (tableFooterEl) tableFooterEl.textContent = csvFileCreatedLabel;
+            const footerEl = document.getElementById('footer-csv-created');
+            if (footerEl) footerEl.textContent = csvFileCreatedLabel;
+        }
+
+        function parseStooqCsv(csvText, lastModifiedHeader = null) {
             if (!csvText || typeof csvText !== 'string') return 0;
 
             const lines = csvText
@@ -903,14 +946,44 @@
 
             const parsedItems = [];
             const newMap = {};
+            let explicitGeneratedAt = null;
+            let latestRowDateTime = '';
 
-            // Első sor a fejléc (Symbol,Date,Time,Open,High,Low,Close,Volume,Name)
-            for (let i = 1; i < lines.length; i++) {
-                const cols = lines[i].split(',');
+            // Sorok feldolgozása
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+
+                // 1. Speciális metaadat sor ellenőrzése: #GENERATED_AT,YYYY-MM-DD,HH:MM:SS
+                if (line.startsWith('#GENERATED_AT')) {
+                    const metaCols = line.split(',');
+                    if (metaCols.length >= 3) {
+                        explicitGeneratedAt = `${metaCols[1].trim()} ${metaCols[2].trim()}`;
+                    } else if (metaCols.length === 2) {
+                        explicitGeneratedAt = metaCols[1].trim();
+                    }
+                    continue;
+                }
+
+                // Fejléc vagy egyéb komment sor átugrása
+                if (line.startsWith('#') || line.toLowerCase().startsWith('symbol,date')) {
+                    continue;
+                }
+
+                const cols = line.split(',');
                 if (cols.length < 7) continue;
 
                 let rawSymbol = cols[0].trim().toUpperCase();
                 if (!rawSymbol) continue;
+
+                const rawRowDate = cols[1]?.trim() || '';
+                const rawRowTime = cols[2]?.trim() || '';
+                if (rawRowDate && rawRowDate !== 'N/D' && rawRowDate.startsWith('202')) {
+                    const cleanTime = (rawRowTime && rawRowTime !== 'N/D') ? rawRowTime : '00:00:00';
+                    const combinedDt = `${rawRowDate} ${cleanTime}`;
+                    if (combinedDt > latestRowDateTime) {
+                        latestRowDateTime = combinedDt;
+                    }
+                }
 
                 // Ha a Stooq CSV-ben benne van az EURHUF devizapár, kiolvassuk belőle a friss EUR/HUF árfolyamot
                 if (rawSymbol === 'EURHUF') {
@@ -930,8 +1003,8 @@
                     rawSymbol = SYMBOL_ALIASES[rawSymbol];
                 }
 
-                const dateStr = cols[1]?.trim() || '';
-                const timeStr = cols[2]?.trim() || '';
+                const dateStr = rawRowDate;
+                const timeStr = rawRowTime;
                 const openVal = parseFloat(cols[3]);
                 const highVal = parseFloat(cols[4]);
                 const lowVal  = parseFloat(cols[5]);
@@ -1081,7 +1154,23 @@
             stockMap = newMap;
             saveHistoryLog();
 
-            // Frissítési időbélyeg
+            // CSV készítési idő meghatározása 3 lépcsőben:
+            // 1. #GENERATED_AT meta-sor a CSV-ben -> 2. HTTP Last-Modified fejléc -> 3. Legfrissebb kötési dátum/idő a CSV soraiból
+            let resolvedCsvCreated = '--';
+            if (explicitGeneratedAt) {
+                resolvedCsvCreated = explicitGeneratedAt;
+            } else if (lastModifiedHeader) {
+                const parsedModDate = new Date(lastModifiedHeader);
+                if (!isNaN(parsedModDate.getTime())) {
+                    resolvedCsvCreated = formatBudapestTimestamp(parsedModDate);
+                }
+            }
+            if (resolvedCsvCreated === '--' && latestRowDateTime) {
+                resolvedCsvCreated = latestRowDateTime;
+            }
+            updateCsvCreatedUI(resolvedCsvCreated);
+
+            // Böngésző szinkron időbélyeg
             const now = new Date();
             const timeFormatted = now.toLocaleTimeString('hu-HU');
             document.getElementById('last-updated-time').textContent = timeFormatted;
