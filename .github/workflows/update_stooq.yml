@@ -29,9 +29,31 @@ jobs:
       - name: Repo letoltese
         uses: actions/checkout@v4
 
-      - name: Stooq BET (BUX + EURHUF + 52 Reszveny + 20 Xtend) adatok lekerese
+      - name: Stooq BET adatok lekerese 3 csomagban (URL limit es blokkolas ellen)
         run: |
-          curl -s "https://stooq.com/q/l/?s=^bux+eurhuf+4ig.hu+akko.hu+alteo.hu+amixa.hu+any.hu+appeninn.hu+autowallis.hu+bet.hu+bgreit.hu+bif.hu+cigpannonia.hu+civita.hu+delta.hu+dhgroup.hu+dmker.hu+enefi.hu+enefiels.hu+eproliusia.hu+esense.hu+finext.hu+finextb.hu+forrasoe.hu+forrast.hu+futuraqua.hu+gloster.hu+goodwillphrm.hu+granit.hu+gspark.hu+masterplast.hu+mbhbank.hu+mbhjb.hu+megakran.hu+mol.hu+mtel.hu+nordgeneral.hu+nutex.hu+opus.hu+ormester.hu+otp.hu+pannergy.hu+pensum.hu+raba.hu+richt.hu+splus.hu+strt.hu+sundell.hu+ubm.hu+uplaza.hu+vertikal.hu+vig.hu+waberers.hu+zwack.hu+astrasun.hu+biggeorge.hu+cdsys.hu+chome.hu+coolklima.hu+deltakamatoz.hu+energyinvest.hu+epduferr.hu+glia.hu+gopd.hu+kermannit.hu+metmax.hu+multihome.hu+nap.hu+naturland.hu+navigator.hu+o3pnrs.hu+polyduct.hu+valberg.hu+vvt.hu&f=sd2t2ohlcvn&h&e=csv" -o bet_data.csv
+          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+          
+          # 1. csomag: BUX, EURHUF es az elso 26 reszveny (fejleccel: &h)
+          curl -s -L -A "$UA" "https://stooq.com/q/l/?s=^bux+eurhuf+4ig.hu+akko.hu+alteo.hu+amixa.hu+any.hu+appeninn.hu+autowallis.hu+bet.hu+bgreit.hu+bif.hu+cigpannonia.hu+civita.hu+delta.hu+dhgroup.hu+dmker.hu+enefi.hu+enefiels.hu+eproliusia.hu+esense.hu+finext.hu+finextb.hu+forrasoe.hu+forrast.hu+futuraqua.hu+gloster.hu+goodwillphrm.hu&f=sd2t2ohlcvn&h&e=csv" > bet_data_new.csv
+          sleep 1
+          
+          # 2. csomag: A maradek 26 szabalyozott piaci reszveny (fejlec nelkul, elso sor eldobva)
+          curl -s -L -A "$UA" "https://stooq.com/q/l/?s=granit.hu+gspark.hu+masterplast.hu+mbhbank.hu+mbhjb.hu+megakran.hu+mol.hu+mtel.hu+nordgeneral.hu+nutex.hu+opus.hu+ormester.hu+otp.hu+pannergy.hu+pensum.hu+raba.hu+richt.hu+splus.hu+strt.hu+sundell.hu+ubm.hu+uplaza.hu+vertikal.hu+vig.hu+waberers.hu+zwack.hu&f=sd2t2ohlcvn&h&e=csv" | tail -n +2 >> bet_data_new.csv
+          sleep 1
+          
+          # 3. csomag: A 20 Xtend reszveny (fejlec nelkul, elso sor eldobva)
+          curl -s -L -A "$UA" "https://stooq.com/q/l/?s=astrasun.hu+biggeorge.hu+cdsys.hu+chome.hu+coolklima.hu+deltakamatoz.hu+energyinvest.hu+epduferr.hu+glia.hu+gopd.hu+kermannit.hu+metmax.hu+multihome.hu+nap.hu+naturland.hu+navigator.hu+o3pnrs.hu+polyduct.hu+valberg.hu+vvt.hu&f=sd2t2ohlcvn&h&e=csv" | tail -n +2 >> bet_data_new.csv
+          
+          # Ellenorzes: Csak akkor irjuk felul a bet_data.csv-t, ha valodi CSV jott vissza (nem HTML hibaoldal)
+          if grep -q "Symbol,Date" bet_data_new.csv && ! grep -q "<title>Stooq</title>" bet_data_new.csv; then
+            mv bet_data_new.csv bet_data.csv
+            echo "Sikeres Stooq CSV letoltes!"
+          else
+            echo "Hiba: A Stooq nem ervenyes CSV-t adott vissza:"
+            cat bet_data_new.csv
+            rm -f bet_data_new.csv
+            exit 1
+          fi
 
       - name: CSV mentese a repoba (ha valtozott)
         run: |
