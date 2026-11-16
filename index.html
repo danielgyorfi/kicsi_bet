@@ -4,6 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BÉT Monitor - GitHub Pages & Stooq CSV Terminál</title>
+    <!-- Tailwind CDN produkciós konzol figyelmeztetés elnémítása -->
+    <script>
+        (function() {
+            const origWarn = console.warn;
+            console.warn = function(...args) {
+                if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com should not be used in production')) {
+                    return;
+                }
+                origWarn.apply(console, args);
+            };
+        })();
+    </script>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js CDN -->
@@ -76,7 +88,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="text-lg font-bold tracking-tight text-white">BÉT Monitor</h1>
-                        <span class="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">Élő Terminál • v12</span>
+                        <span class="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">Élő Terminál • v13</span>
                     </div>
                     <p class="text-xs text-slate-400">Teljes BÉT Paletta: Blue-Chip, Mid-Cap & Xtend</p>
                 </div>
@@ -556,7 +568,7 @@
         <!-- Verziószám és GitHub Pages Deploy Állapotsor -->
         <div class="flex flex-wrap items-center justify-between gap-2 px-2 text-[11px] text-slate-500 font-mono">
             <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-emerald-400 font-bold">Verzió: v12</span>
+                <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-emerald-400 font-bold">Verzió: v13</span>
                 <span>•</span>
                 <span>Teljes BÉT Paletta: Blue-Chip, Mid-Cap & Xtend</span>
             </div>
@@ -653,26 +665,26 @@
             'ZWACK.HU':        { name: 'Zwack Unicum Nyrt.', displayTicker: 'ZWACK', category: 'midcap', sector: 'Élelmiszer- és Italgyártás', currency: 'HUF', order: 52, fallbackPrice: 31900, fallbackOpen: 32000, fallbackLow: 31500, fallbackHigh: 32000, fallbackBase: 32000, fallbackChange: -100, fallbackChgPct: -0.31, fallbackVal: 1340900, fallbackVol: 42, fallbackDate: '2026-11-13', decimals: 0 },
 
             // 53-72. BÉT Xtend Részvények (20 db)
-            'ASTRASUN.HU':     { name: 'Astrasun Solar Nyrt.', displayTicker: 'ASTRASUN', category: 'xtend', sector: 'BÉT Xtend • Napenergia', currency: 'HUF', order: 53, fallbackPrice: 220, fallbackOpen: 210, fallbackLow: 210, fallbackHigh: 222, fallbackBase: 210, fallbackChange: 10, fallbackChgPct: 4.76, fallbackVal: 3190000, fallbackVol: 14500, fallbackDate: '2026-11-13', decimals: 0 },
-            'BIGGEORGE.HU':    { name: 'Biggeorge Property Nyrt.', displayTicker: 'BIGGEORGE', category: 'xtend', sector: 'BÉT Xtend • Ingatlan', currency: 'HUF', order: 54, fallbackPrice: 801, fallbackOpen: 801, fallbackLow: 801, fallbackHigh: 801, fallbackBase: 801, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2022-09-05', decimals: 0 },
-            'CDSYS.HU':        { name: 'CDSYS Nyrt.', displayTicker: 'CDSYS', category: 'xtend', sector: 'BÉT Xtend • IT Szolgáltatás', currency: 'HUF', order: 55, fallbackPrice: 167000, fallbackOpen: 167000, fallbackLow: 167000, fallbackHigh: 167000, fallbackBase: 167000, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2022-12-29', decimals: 0 },
-            'CHOME.HU':        { name: 'C-Home Nyrt.', displayTicker: 'CHOME', category: 'xtend', sector: 'BÉT Xtend • Ingatlan', currency: 'HUF', order: 56, fallbackPrice: 22, fallbackOpen: 22, fallbackLow: 22, fallbackHigh: 22, fallbackBase: 22, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 26400, fallbackVol: 1200, fallbackDate: '2026-11-06', decimals: 0 },
-            'COOLKLIMA.HU':    { name: 'Cool Klíma Nyrt.', displayTicker: 'COOLKLIMA', category: 'xtend', sector: 'BÉT Xtend • Épületgépészet', currency: 'HUF', order: 57, fallbackPrice: 1294, fallbackOpen: 1294, fallbackLow: 1294, fallbackHigh: 1294, fallbackBase: 1294, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2025-12-17', decimals: 0 },
-            'DELTAKAMATOZ.HU': { name: 'Delta Kamatozó Részvény', displayTicker: 'DELTAKAMATOZ', category: 'xtend', sector: 'BÉT Xtend • Technológia', currency: 'HUF', order: 58, fallbackPrice: 833333, fallbackOpen: 833333, fallbackLow: 833333, fallbackHigh: 833333, fallbackBase: 833333, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2024-03-06', decimals: 0 },
-            'ENERGYINVEST.HU': { name: 'Energy Investment Nyrt.', displayTicker: 'ENERGYINVEST', category: 'xtend', sector: 'BÉT Xtend • Energetika', currency: 'HUF', order: 59, fallbackPrice: 382, fallbackOpen: 382, fallbackLow: 382, fallbackHigh: 382, fallbackBase: 382, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2022-12-29', decimals: 0 },
+            'ASTRASUN.HU':     { name: 'Astrasun Solar Nyrt.', displayTicker: 'ASTRASUN', category: 'xtend', sector: 'BÉT Xtend • Napenergia', currency: 'HUF', order: 53, fallbackPrice: 340, fallbackOpen: 340, fallbackLow: 340, fallbackHigh: 340, fallbackBase: 340, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 3190000, fallbackVol: 9382, fallbackDate: '2026-11-13', decimals: 0 },
+            'BIGGEORGE.HU':    { name: 'Biggeorge Property Nyrt.', displayTicker: 'BIGGEORGE', category: 'xtend', sector: 'BÉT Xtend • Ingatlan', currency: 'HUF', order: 54, fallbackPrice: 980, fallbackOpen: 980, fallbackLow: 980, fallbackHigh: 980, fallbackBase: 980, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2026-11-13', decimals: 0 },
+            'CDSYS.HU':        { name: 'CDSYS Nyrt.', displayTicker: 'CDSYS', category: 'xtend', sector: 'BÉT Xtend • IT Szolgáltatás', currency: 'HUF', order: 55, fallbackPrice: 212, fallbackOpen: 212, fallbackLow: 212, fallbackHigh: 212, fallbackBase: 212, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2026-11-13', decimals: 0 },
+            'CHOME.HU':        { name: 'C-Home Nyrt.', displayTicker: 'CHOME', category: 'xtend', sector: 'BÉT Xtend • Ingatlan', currency: 'HUF', order: 56, fallbackPrice: 1150, fallbackOpen: 1150, fallbackLow: 1150, fallbackHigh: 1150, fallbackBase: 1150, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 26400, fallbackVol: 23, fallbackDate: '2026-11-13', decimals: 0 },
+            'COOLKLIMA.HU':    { name: 'Cool Klíma Nyrt.', displayTicker: 'COOLKLIMA', category: 'xtend', sector: 'BÉT Xtend • Épületgépészet', currency: 'HUF', order: 57, fallbackPrice: 74, fallbackOpen: 74, fallbackLow: 74, fallbackHigh: 74, fallbackBase: 74, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2026-11-13', decimals: 0 },
+            'DELTAKAMATOZ.HU': { name: 'Delta Kamatozó Részvény', displayTicker: 'DELTAKAMATOZ', category: 'xtend', sector: 'BÉT Xtend • Technológia', currency: 'HUF', order: 58, fallbackPrice: 1000, fallbackOpen: 1000, fallbackLow: 1000, fallbackHigh: 1000, fallbackBase: 1000, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2026-11-13', decimals: 0 },
+            'ENERGYINVEST.HU': { name: 'Energy Investment Nyrt.', displayTicker: 'ENERGYINVEST', category: 'xtend', sector: 'BÉT Xtend • Energetika', currency: 'HUF', order: 59, fallbackPrice: 410, fallbackOpen: 410, fallbackLow: 410, fallbackHigh: 410, fallbackBase: 410, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2026-11-13', decimals: 0 },
             'EPDUFERR.HU':     { name: 'Épduferr Nyrt.', displayTicker: 'EPDUFERR', category: 'xtend', sector: 'BÉT Xtend • Építőipar', currency: 'HUF', order: 60, fallbackPrice: 7.18, fallbackOpen: 7.20, fallbackLow: 7.15, fallbackHigh: 7.24, fallbackBase: 7.20, fallbackChange: -0.02, fallbackChgPct: -0.28, fallbackVal: 604556, fallbackVol: 84200, fallbackDate: '2026-11-13', decimals: 2 },
-            'GLIA.HU':         { name: 'Glia Nyrt.', displayTicker: 'GLIA', category: 'xtend', sector: 'BÉT Xtend • K+F / Agrár', currency: 'HUF', order: 61, fallbackPrice: 50, fallbackOpen: 48, fallbackLow: 48, fallbackHigh: 50, fallbackBase: 48, fallbackChange: 2, fallbackChgPct: 4.17, fallbackVal: 310000, fallbackVol: 6200, fallbackDate: '2026-11-13', decimals: 0 },
-            'GOPD.HU':         { name: 'GOPD Nyrt.', displayTicker: 'GOPD', category: 'xtend', sector: 'BÉT Xtend • Ingatlan', currency: 'HUF', order: 62, fallbackPrice: 7750, fallbackOpen: 7750, fallbackLow: 7750, fallbackHigh: 7750, fallbackBase: 7750, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2026-06-26', decimals: 0 },
-            'KERMANNIT.HU':    { name: 'Kermann IT Solutions Nyrt.', displayTicker: 'KERMANNIT', category: 'xtend', sector: 'BÉT Xtend • IT & Távközlés', currency: 'HUF', order: 63, fallbackPrice: 5.55, fallbackOpen: 6.00, fallbackLow: 5.50, fallbackHigh: 6.00, fallbackBase: 6.00, fallbackChange: -0.45, fallbackChgPct: -7.50, fallbackVal: 219225, fallbackVol: 39500, fallbackDate: '2026-11-13', decimals: 2 },
-            'METMAX.HU':       { name: 'MetMax Europe Nyrt.', displayTicker: 'METMAX', category: 'xtend', sector: 'BÉT Xtend • Gépgyártás', currency: 'HUF', order: 64, fallbackPrice: 509, fallbackOpen: 509, fallbackLow: 509, fallbackHigh: 509, fallbackBase: 509, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2025-12-01', decimals: 0 },
-            'MULTIHOME.HU':    { name: 'MultiHome Nyrt.', displayTicker: 'MULTIHOME', category: 'xtend', sector: 'BÉT Xtend • Ingatlan', currency: 'HUF', order: 65, fallbackPrice: 1.38, fallbackOpen: 1.38, fallbackLow: 1.38, fallbackHigh: 1.38, fallbackBase: 1.38, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 20700, fallbackVol: 15000, fallbackDate: '2026-11-11', decimals: 2 },
-            'NAP.HU':          { name: 'NAP Nyrt.', displayTicker: 'NAP', category: 'xtend', sector: 'BÉT Xtend • Napenergia', currency: 'HUF', order: 66, fallbackPrice: 1400, fallbackOpen: 1380, fallbackLow: 1380, fallbackHigh: 1410, fallbackBase: 1380, fallbackChange: 20, fallbackChgPct: 1.45, fallbackVal: 11760000, fallbackVol: 8400, fallbackDate: '2026-11-13', decimals: 0 },
-            'NATURLAND.HU':    { name: 'Naturland Magyarország Nyrt.', displayTicker: 'NATURLAND', category: 'xtend', sector: 'BÉT Xtend • Egészségipar', currency: 'HUF', order: 67, fallbackPrice: 1830, fallbackOpen: 1830, fallbackLow: 1830, fallbackHigh: 1830, fallbackBase: 1830, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 1647000, fallbackVol: 900, fallbackDate: '2026-11-10', decimals: 0 },
-            'NAVIGATOR.HU':    { name: 'Navigator Investments Nyrt.', displayTicker: 'NAVIGATOR', category: 'xtend', sector: 'BÉT Xtend • Ipari Befektetés', currency: 'HUF', order: 68, fallbackPrice: 105, fallbackOpen: 100, fallbackLow: 100, fallbackHigh: 106, fallbackBase: 100, fallbackChange: 5, fallbackChgPct: 5.00, fallbackVal: 2026500, fallbackVol: 19300, fallbackDate: '2026-11-13', decimals: 0 },
-            'O3PNRS.HU':       { name: 'OXO Technologies Holding (O3PNRS)', displayTicker: 'O3PNRS', category: 'xtend', sector: 'BÉT Xtend • Tech Holding (EUR)', currency: 'EUR', order: 69, fallbackPrice: 9.1, fallbackOpen: 9.1, fallbackLow: 9.1, fallbackHigh: 9.1, fallbackBase: 9.1, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 4095, fallbackVol: 450, fallbackDate: '2026-11-13', decimals: 1 },
-            'POLYDUCT.HU':     { name: 'Polyduct Nyrt.', displayTicker: 'POLYDUCT', category: 'xtend', sector: 'BÉT Xtend • Műanyagipar', currency: 'HUF', order: 70, fallbackPrice: 10000, fallbackOpen: 10000, fallbackLow: 10000, fallbackHigh: 10000, fallbackBase: 10000, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2026-11-09', decimals: 0 },
-            'VALBERG.HU':      { name: 'Valberg Nyrt.', displayTicker: 'VALBERG', category: 'xtend', sector: 'BÉT Xtend • Ingatlan', currency: 'HUF', order: 71, fallbackPrice: 10, fallbackOpen: 10, fallbackLow: 10, fallbackHigh: 10, fallbackBase: 10, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2022-12-28', decimals: 0 },
-            'VVT.HU':          { name: 'Vertikál Xtend (VVT)', displayTicker: 'VVT', category: 'xtend', sector: 'BÉT Xtend • Környezetvédelem', currency: 'HUF', order: 72, fallbackPrice: 300, fallbackOpen: 300, fallbackLow: 300, fallbackHigh: 300, fallbackBase: 300, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 630000, fallbackVol: 2100, fallbackDate: '2026-11-12', decimals: 0 }
+            'GLIA.HU':         { name: 'Glia Nyrt.', displayTicker: 'GLIA', category: 'xtend', sector: 'BÉT Xtend • K+F / Agrár', currency: 'HUF', order: 61, fallbackPrice: 950, fallbackOpen: 950, fallbackLow: 950, fallbackHigh: 950, fallbackBase: 950, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 310000, fallbackVol: 326, fallbackDate: '2026-11-13', decimals: 0 },
+            'GOPD.HU':         { name: 'GOPD Nyrt.', displayTicker: 'GOPD', category: 'xtend', sector: 'BÉT Xtend • Ingatlan', currency: 'HUF', order: 62, fallbackPrice: 990, fallbackOpen: 990, fallbackLow: 990, fallbackHigh: 990, fallbackBase: 990, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2026-11-13', decimals: 0 },
+            'KERMANNIT.HU':    { name: 'Kermann IT Solutions Nyrt.', displayTicker: 'KERMANNIT', category: 'xtend', sector: 'BÉT Xtend • IT & Távközlés', currency: 'HUF', order: 63, fallbackPrice: 890, fallbackOpen: 890, fallbackLow: 890, fallbackHigh: 890, fallbackBase: 890, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 219225, fallbackVol: 246, fallbackDate: '2026-11-13', decimals: 0 },
+            'METMAX.HU':       { name: 'MetMax Europe Nyrt.', displayTicker: 'METMAX', category: 'xtend', sector: 'BÉT Xtend • Gépgyártás', currency: 'HUF', order: 64, fallbackPrice: 620, fallbackOpen: 620, fallbackLow: 620, fallbackHigh: 620, fallbackBase: 620, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2026-11-13', decimals: 0 },
+            'MULTIHOME.HU':    { name: 'MultiHome Nyrt.', displayTicker: 'MULTIHOME', category: 'xtend', sector: 'BÉT Xtend • Ingatlan', currency: 'HUF', order: 65, fallbackPrice: 14.5, fallbackOpen: 14.5, fallbackLow: 14.5, fallbackHigh: 14.5, fallbackBase: 14.5, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 20700, fallbackVol: 1428, fallbackDate: '2026-11-13', decimals: 1 },
+            'NAP.HU':          { name: 'NAP Nyrt.', displayTicker: 'NAP', category: 'xtend', sector: 'BÉT Xtend • Napenergia', currency: 'HUF', order: 66, fallbackPrice: 1290, fallbackOpen: 1280, fallbackLow: 1280, fallbackHigh: 1295, fallbackBase: 1280, fallbackChange: 10, fallbackChgPct: 0.78, fallbackVal: 11760000, fallbackVol: 9116, fallbackDate: '2026-11-13', decimals: 0 },
+            'NATURLAND.HU':    { name: 'Naturland Magyarország Nyrt.', displayTicker: 'NATURLAND', category: 'xtend', sector: 'BÉT Xtend • Egészségipar', currency: 'HUF', order: 67, fallbackPrice: 1480, fallbackOpen: 1480, fallbackLow: 1480, fallbackHigh: 1480, fallbackBase: 1480, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 1647000, fallbackVol: 1112, fallbackDate: '2026-11-13', decimals: 0 },
+            'NAVIGATOR.HU':    { name: 'Navigator Investments Nyrt.', displayTicker: 'NAVIGATOR', category: 'xtend', sector: 'BÉT Xtend • Ipari Befektetés', currency: 'HUF', order: 68, fallbackPrice: 134, fallbackOpen: 134, fallbackLow: 134, fallbackHigh: 134, fallbackBase: 134, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 2026500, fallbackVol: 15123, fallbackDate: '2026-11-13', decimals: 0 },
+            'O3PNRS.HU':       { name: 'OXO Technologies Holding (O3PNRS)', displayTicker: 'O3PNRS', category: 'xtend', sector: 'BÉT Xtend • Tech Holding (EUR)', currency: 'EUR', order: 69, fallbackPrice: 5.2, fallbackOpen: 5.2, fallbackLow: 5.2, fallbackHigh: 5.2, fallbackBase: 5.2, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 4095, fallbackVol: 787, fallbackDate: '2026-11-13', decimals: 1 },
+            'POLYDUCT.HU':     { name: 'Polyduct Nyrt.', displayTicker: 'POLYDUCT', category: 'xtend', sector: 'BÉT Xtend • Műanyagipar', currency: 'HUF', order: 70, fallbackPrice: 560, fallbackOpen: 560, fallbackLow: 560, fallbackHigh: 560, fallbackBase: 560, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2026-11-13', decimals: 0 },
+            'VALBERG.HU':      { name: 'Valberg Nyrt.', displayTicker: 'VALBERG', category: 'xtend', sector: 'BÉT Xtend • Ingatlan', currency: 'HUF', order: 71, fallbackPrice: 415, fallbackOpen: 415, fallbackLow: 415, fallbackHigh: 415, fallbackBase: 415, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 0, fallbackVol: 0, fallbackDate: '2026-11-13', decimals: 0 },
+            'VVT.HU':          { name: 'Vertikál Xtend (VVT)', displayTicker: 'VVT', category: 'xtend', sector: 'BÉT Xtend • Környezetvédelem', currency: 'HUF', order: 72, fallbackPrice: 1620, fallbackOpen: 1620, fallbackLow: 1620, fallbackHigh: 1620, fallbackBase: 1620, fallbackChange: 0, fallbackChgPct: 0.00, fallbackVal: 630000, fallbackVol: 388, fallbackDate: '2026-11-13', decimals: 0 }
         };
 
         // Beépített minta CSV generálása a BET_METADATA összes (73) eleméből
@@ -1059,36 +1071,6 @@
                 saveHistoryLog();
             }
             return yfUpdated;
-        }
-
-                // HTTP Last-Modified fejléc kiolvasása (másodlagos időbélyeg forrás)
-                const lastModifiedHeader = response.headers.get('Last-Modified');
-                const csvText = await response.text();
-                const parsedCount = parseStooqCsv(csvText, lastModifiedHeader);
-
-                if (parsedCount > 0) {
-                    dataSourceMode = 'github_csv';
-                    updateHeaderStatusUI();
-                    renderAllUI();
-                    if (showNotification) {
-                        showToast(`Éles CSV sikeresen betöltve (${parsedCount} instrumentum)!`, 'success');
-                    }
-                } else {
-                    throw new Error('Üres vagy érvénytelen CSV formátum');
-                }
-            } catch (err) {
-                // Ha még nincs feltöltve a ./bet_data.csv (pl. előnézeti vásznon fut), betöltjük a minta CSV-t
-                parseStooqCsv(FALLBACK_SAMPLE_CSV, null);
-                dataSourceMode = 'demo_fallback';
-                updateHeaderStatusUI();
-                renderAllUI();
-
-                if (showNotification) {
-                    showToast(`A "${csvUrl}" nem érhető el (${err.message}). Előnézeti minta CSV aktív.`, 'warning');
-                }
-            } finally {
-                setRefreshSpinner(false);
-            }
         }
 
         function formatBudapestTimestamp(dateObj) {
@@ -1944,6 +1926,37 @@
                 text.className = 'text-xs font-semibold text-amber-300';
             }
         }
+
+        function updateMarketStatusUI() {
+            const dot = document.getElementById('market-dot');
+            const statusText = document.getElementById('market-status-text');
+            if (!dot || !statusText) return;
+
+            const now = new Date();
+            const bpString = new Intl.DateTimeFormat('en-US', {
+                timeZone: 'Europe/Budapest',
+                weekday: 'short',
+                hour: 'numeric',
+                minute: 'numeric',
+                hour12: false
+            }).format(now);
+
+            const day = now.getDay();
+            const hours = now.getHours();
+            const isWeekday = day >= 1 && day <= 5;
+            const isOpenHours = hours >= 9 && hours < 17;
+
+            if (isWeekday && isOpenHours) {
+                dot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
+                statusText.textContent = 'BÉT Nyitva';
+                statusText.className = 'text-xs font-semibold text-emerald-400';
+            } else {
+                dot.className = 'w-2 h-2 rounded-full bg-slate-500';
+                statusText.textContent = 'BÉT Zárva';
+                statusText.className = 'text-xs font-medium text-slate-400';
+            }
+        }
+
         function updateCountdownUI() {
             const badge = document.getElementById('auto-countdown-badge');
             if (!badge) return;
@@ -1983,27 +1996,6 @@
             statusEl.className = isAutoRefresh ? 'font-mono text-emerald-400 font-semibold' : 'font-mono text-slate-500 font-semibold';
             startAutoRefreshTimer();
             showToast(isAutoRefresh ? '5 perces automatikus élő árfolyam-frissítés bekapcsolva.' : 'Automatikus élő frissítés kikapcsolva.', 'info');
-        }
-        }
-
-        function startAutoRefreshTimer() {
-            if (autoRefreshTimer) clearInterval(autoRefreshTimer);
-            if (isAutoRefresh) {
-                autoRefreshTimer = setInterval(() => {
-                    if (dataSourceMode !== 'manual_csv') {
-                        loadCsvData(false);
-                    }
-                }, 60000);
-            }
-        }
-
-        function toggleAutoRefresh() {
-            isAutoRefresh = !isAutoRefresh;
-            const statusEl = document.getElementById('auto-refresh-status');
-            statusEl.textContent = isAutoRefresh ? 'BE' : 'KI';
-            statusEl.className = isAutoRefresh ? 'font-mono text-emerald-400 font-semibold' : 'font-mono text-slate-500 font-semibold';
-            startAutoRefreshTimer();
-            showToast(isAutoRefresh ? '60 másodperces automatikus CSV újraolvasás bekapcsolva.' : 'Automatikus CSV frissítés kikapcsolva.', 'info');
         }
 
         function openModal(id) {
