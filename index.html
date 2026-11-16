@@ -76,25 +76,15 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="text-lg font-bold tracking-tight text-white">BÉT Monitor</h1>
-                        <span class="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">Stooq CSV • v9</span>
+                        <span class="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">Stooq CSV • v10</span>
                     </div>
                     <p class="text-xs text-slate-400">Teljes BÉT Paletta: Blue-Chip, Mid-Cap & Xtend</p>
                 </div>
             </div>
 
-            <!-- Középső Időbélyeg és Piaci Állapot Sáv -->
-            <div class="flex flex-wrap items-center gap-3 bg-slate-900/90 border border-slate-800 px-3.5 py-2 rounded-xl">
+            <!-- Középső Piaci Állapot Sáv -->
+            <div class="hidden sm:flex items-center gap-3 bg-slate-900/90 border border-slate-800 px-3.5 py-2 rounded-xl">
                 <div class="flex items-center gap-2">
-                    <i data-lucide="clock" class="w-3.5 h-3.5 text-blue-400"></i>
-                    <div class="text-[11px] text-slate-400 font-mono">
-                        Utolsó kötés / szinkron: <span id="stooq-timestamp" class="text-slate-200 font-semibold">--</span>
-                    </div>
-                </div>
-
-                <div class="h-5 w-[1px] bg-slate-800 hidden sm:block"></div>
-
-                <!-- BÉT Nyitvatartás -->
-                <div class="hidden sm:flex items-center gap-2">
                     <span id="market-dot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
                     <div class="flex items-center gap-1.5">
                         <span id="market-status-text" class="text-xs font-medium text-slate-200">Piaci állapot</span>
@@ -321,7 +311,7 @@
                         <thead class="sticky top-0 z-10 bg-slate-900/95 backdrop-blur">
                             <tr class="border-b border-slate-800/80 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                                 <th class="py-3 pl-3 pr-1 w-8 text-center">★</th>
-                                <th class="py-3 px-2">Név / Idő</th>
+                                <th class="py-3 px-2">Név</th>
                                 <th class="py-3 px-2 text-right">Utolsó Ár (Deviza)</th>
                                 <th class="py-3 px-2 text-right">Változás (árf. / %)</th>
                                 <th class="py-3 px-2 text-right hidden md:table-cell">Nyitó / Bázisár</th>
@@ -364,15 +354,16 @@
                 <!-- Fejléc -->
                 <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-800 pb-4">
                     <div>
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2 flex-wrap">
                             <span id="detail-ticker" class="font-mono text-sm font-bold px-2.5 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">OTP.HU</span>
                             <span id="detail-category-badge" class="text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-800 text-slate-300">Blue Chip</span>
                             <span id="detail-sector" class="text-xs text-slate-400">Bank / Pénzügy</span>
+                            <a id="ext-link-stooq" href="https://stooq.com/q/?s=otp.hu" target="_blank" rel="noopener noreferrer" class="text-[11px] text-blue-400 hover:underline inline-flex items-center gap-1 ml-1">
+                                <span>Stooq</span>
+                                <i data-lucide="external-link" class="w-3 h-3"></i>
+                            </a>
                         </div>
                         <h2 id="detail-name" class="text-xl font-bold text-white mt-1.5">OTP Bank Nyrt.</h2>
-                        <div class="text-[11px] text-slate-400 font-mono mt-0.5">
-                            Utolsó Stooq kötés: <span id="detail-datetime" class="text-slate-300">--</span>
-                        </div>
                     </div>
 
                     <div class="text-right">
@@ -441,34 +432,6 @@
                     <div class="bg-slate-900/70 border border-slate-800/90 p-2.5 rounded-xl">
                         <div class="text-[10px] uppercase text-slate-400">Forgalom Érték</div>
                         <div id="stat-turnover" class="font-mono text-xs font-bold text-emerald-400 mt-0.5">--</div>
-                    </div>
-                </div>
-
-                <!-- Gyors Vásárlási Kalkulátor & Külső Stooq link -->
-                <div class="bg-slate-900/50 border border-slate-800/80 rounded-xl p-3.5">
-                    <div class="text-xs font-semibold text-slate-200 mb-2 flex items-center justify-between">
-                        <span class="flex items-center gap-1.5">
-                            <i data-lucide="calculator" class="w-3.5 h-3.5 text-emerald-400"></i>
-                            Gyors Darabszám Kalkulátor (<span id="calc-ticker-label" class="font-mono text-blue-400">OTP.HU</span>)
-                        </span>
-                        <a id="ext-link-stooq" href="https://stooq.com/q/?s=otp.hu" target="_blank" rel="noopener noreferrer" class="text-[11px] text-blue-400 hover:underline flex items-center gap-1">
-                            <span>Stooq Adatlap</span>
-                            <i data-lucide="external-link" class="w-3 h-3"></i>
-                        </a>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
-                        <div>
-                            <label id="calc-budget-label" class="block text-[10px] text-slate-400 mb-1">Befektetendő összeg (HUF)</label>
-                            <input id="calc-budget" type="number" value="500000" step="10000" oninput="updatePositionCalculator()"
-                                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-blue-500">
-                        </div>
-                        <div class="bg-slate-950/80 border border-slate-800 rounded-lg px-3 py-1.5 flex items-center justify-between">
-                            <div>
-                                <div class="text-[10px] text-slate-400">Vásárolható mennyiség</div>
-                                <div id="calc-shares-result" class="font-mono text-sm font-bold text-emerald-400">0 db</div>
-                            </div>
-                            <div id="calc-exact-cost" class="text-[11px] font-mono text-slate-300 text-right">Érték: 0 Ft</div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -584,7 +547,7 @@
         <!-- Verziószám és GitHub Pages Deploy Állapotsor -->
         <div class="flex flex-wrap items-center justify-between gap-2 px-2 text-[11px] text-slate-500 font-mono">
             <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-emerald-400 font-bold">Verzió: v9</span>
+                <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-emerald-400 font-bold">Verzió: v10</span>
                 <span>•</span>
                 <span>Teljes BÉT Paletta: Blue-Chip, Mid-Cap & Xtend</span>
             </div>
@@ -800,7 +763,6 @@
                         EUR_HUF_RATE = Math.round(data.rates.HUF * 100) / 100;
                         eurRateSourceLabel = 'Élő deviza API';
                         updateEurRateUI();
-                        updatePositionCalculator();
                         if (showToastMsg) {
                             showToast(`Élő EUR/HUF árfolyam frissítve: ${formatNumber(EUR_HUF_RATE, 2)} Ft`, 'success');
                         }
@@ -819,7 +781,6 @@
                         EUR_HUF_RATE = Math.round(data2.rates.HUF * 100) / 100;
                         eurRateSourceLabel = 'Frankfurter EKB API';
                         updateEurRateUI();
-                        updatePositionCalculator();
                         if (showToastMsg) {
                             showToast(`EKB EUR/HUF árfolyam frissítve: ${formatNumber(EUR_HUF_RATE, 2)} Ft`, 'success');
                         }
@@ -988,18 +949,23 @@
                     order: 99 + i
                 };
 
-                const hasClose = !isNaN(closeVal) && closeVal > 0;
                 const fallbackPrice = meta.fallbackPrice ?? 0;
                 const fallbackOpen  = meta.fallbackOpen ?? fallbackPrice;
                 const fallbackLow   = meta.fallbackLow ?? Math.min(fallbackPrice, fallbackOpen);
                 const fallbackHigh  = meta.fallbackHigh ?? Math.max(fallbackPrice, fallbackOpen);
                 const fallbackBase  = meta.fallbackBase ?? fallbackOpen;
+                const fallbackDate  = meta.fallbackDate || '2026-11-13';
 
-                const price = hasClose ? closeVal : (!isNaN(openVal) && openVal > 0 ? openVal : fallbackPrice);
-                const open  = (!isNaN(openVal) && openVal > 0) ? openVal : fallbackOpen;
-                const high  = (!isNaN(highVal) && highVal > 0) ? highVal : Math.max(price, open, fallbackHigh);
-                const low   = (!isNaN(lowVal) && lowVal > 0) ? lowVal : Math.min(price, open, fallbackLow);
-                const volume = (!isNaN(volVal) && volVal >= 0) ? volVal : (meta.fallbackVol ?? 0);
+                // Ha a CSV-ben lévő dátum régebbi évből való (pl. EPDUFERR 2024-07-23), mint a mi 2026-os BÉT referencia adatunk,
+                // akkor elvetjük az elavult Stooq sort, és a frissebb BÉT referencia árat használjuk.
+                const isCsvStale = (dateStr && dateStr !== 'N/D' && fallbackDate && dateStr < fallbackDate);
+                const hasClose = !isCsvStale && !isNaN(closeVal) && closeVal > 0;
+
+                const price = hasClose ? closeVal : (!isCsvStale && !isNaN(openVal) && openVal > 0 ? openVal : fallbackPrice);
+                const open  = (!isCsvStale && !isNaN(openVal) && openVal > 0) ? openVal : fallbackOpen;
+                const high  = (!isCsvStale && !isNaN(highVal) && highVal > 0) ? highVal : Math.max(price, open, fallbackHigh);
+                const low   = (!isCsvStale && !isNaN(lowVal) && lowVal > 0) ? lowVal : Math.min(price, open, fallbackLow);
+                const volume = (!isCsvStale && !isNaN(volVal) && volVal >= 0) ? volVal : (meta.fallbackVol ?? 0);
 
                 // Ha az ár megegyezik a képernyőkép fallback árral, a pontos BÉT bázisárat és változást használjuk;
                 // ha új élő Stooq ár érkezett, akkor a bázisárhoz (vagy nyitóárhoz) mérjük
@@ -1011,7 +977,7 @@
                     change = meta.fallbackChange;
                     changePercent = meta.fallbackChgPct;
                 } else {
-                    const refPrice = (open > 0 && price !== open) ? open : basePrice;
+                    const refPrice = basePrice > 0 ? basePrice : open;
                     change = Math.round((price - refPrice) * 10000) / 10000;
                     changePercent = refPrice > 0 ? (change / refPrice) * 100 : 0;
                 }
@@ -1028,8 +994,8 @@
                     rangePositionPct = Math.max(0, Math.min(100, ((price - low) / (high - low)) * 100));
                 }
 
-                const resolvedDate = (dateStr && dateStr !== 'N/D') ? dateStr : (meta.fallbackDate || '--');
-                const resolvedTime = (timeStr && timeStr !== 'N/D') ? timeStr : '17:00:00';
+                const resolvedDate = (!isCsvStale && dateStr && dateStr !== 'N/D') ? dateStr : fallbackDate;
+                const resolvedTime = (!isCsvStale && timeStr && timeStr !== 'N/D') ? timeStr : '17:00:00';
 
                 const item = {
                     symbol: rawSymbol,
@@ -1121,12 +1087,6 @@
             document.getElementById('last-updated-time').textContent = timeFormatted;
             const footerSyncEl = document.getElementById('footer-sync-time');
             if (footerSyncEl) footerSyncEl.textContent = timeFormatted;
-
-            // Legfrissebb Stooq dátum/idő kiírása a fejlécbe
-            const otpOrFirst = stockMap['OTP.HU'] || stocksList[0];
-            if (otpOrFirst) {
-                document.getElementById('stooq-timestamp').textContent = `${otpOrFirst.date} ${otpOrFirst.time}`;
-            }
 
             return stocksList.length;
         }
@@ -1364,7 +1324,6 @@
                             <div class="flex items-center gap-2">
                                 <span class="font-mono font-bold text-white text-xs">${dispTicker}</span>
                                 ${catBadge}
-                                <span class="text-[10px] font-mono text-slate-500">${item.date}</span>
                             </div>
                             <div class="text-xs text-slate-400 truncate max-w-[190px] sm:max-w-[230px]">${item.name}</div>
                         </td>
@@ -1425,7 +1384,6 @@
                             <div>
                                 <div class="flex items-center gap-1.5">
                                     <span class="font-mono font-bold text-sm text-white">${item.displayTicker || item.symbol}</span>
-                                    <span class="text-[10px] text-slate-400">${item.date}</span>
                                 </div>
                                 <div class="text-xs text-slate-300 font-medium truncate max-w-[200px]">${item.name}</div>
                             </div>
@@ -1465,7 +1423,7 @@
         }
 
         /***********************************************************************
-         * 5. JOBB OLDALI RÉSZLETES ADATLAP, OHLC GRAFIKON ÉS KALKULÁTOR
+         * 5. JOBB OLDALI RÉSZLETES ADATLAP ÉS OHLC GRAFIKON
          ***********************************************************************/
         function renderDetailPanel() {
             const item = stockMap[selectedTicker] || stocksList[0];
@@ -1481,7 +1439,6 @@
                 item.category === 'xtend' ? 'BÉT Xtend' : 'Mid-Cap';
             document.getElementById('detail-sector').textContent = item.sector;
             document.getElementById('detail-name').textContent = item.name;
-            document.getElementById('detail-datetime').textContent = `${item.date} • ${item.time}`;
             document.getElementById('detail-price').textContent = `${formatNumber(item.price, decimals)} ${item.currency}`;
 
             const badge = document.getElementById('detail-change-badge');
@@ -1509,45 +1466,13 @@
             document.getElementById('stat-turnover').textContent = item.isIndex ? '—' : formatCompactCurrency(item.turnoverValue, item.currency);
 
             // Stooq külső link
-            document.getElementById('ext-link-stooq').href = `https://stooq.com/q/?s=${encodeURIComponent(item.symbol.toLowerCase())}`;
-
-            // Pozíció kalkulátor címke és számítás
-            document.getElementById('calc-ticker-label').textContent = item.symbol;
-            updatePositionCalculator();
+            const stooqLink = document.getElementById('ext-link-stooq');
+            if (stooqLink) {
+                stooqLink.href = `https://stooq.com/q/?s=${encodeURIComponent(item.symbol.toLowerCase())}`;
+            }
 
             // Grafikon rajzolása
             renderPriceChart(item);
-        }
-
-        function updatePositionCalculator() {
-            const item = stockMap[selectedTicker];
-            if (!item) return;
-
-            const budgetInput = parseFloat(document.getElementById('calc-budget')?.value) || 0;
-            const labelEl = document.getElementById('calc-budget-label');
-            if (labelEl) {
-                labelEl.textContent = item.currency === 'EUR'
-                    ? `Befektetendő összeg (HUF, 1 EUR ≈ ${EUR_HUF_RATE} Ft)`
-                    : 'Befektetendő összeg (HUF)';
-            }
-
-            if (item.price <= 0 || item.isIndex) {
-                document.getElementById('calc-shares-result').textContent = item.isIndex ? 'Index (nem vásárolható)' : '0 db';
-                document.getElementById('calc-exact-cost').textContent = '—';
-                return;
-            }
-
-            const unitPriceInHuf = item.currency === 'EUR' ? item.price * EUR_HUF_RATE : item.price;
-            const shares = Math.floor(budgetInput / unitPriceInHuf);
-            const exactCostHuf = shares * unitPriceInHuf;
-
-            document.getElementById('calc-shares-result').textContent = `${formatNumber(shares, 0)} db`;
-            if (item.currency === 'EUR') {
-                const exactEur = shares * item.price;
-                document.getElementById('calc-exact-cost').textContent = `Érték: ${formatNumber(exactEur, 1)} EUR (~${formatNumber(exactCostHuf, 0)} Ft)`;
-            } else {
-                document.getElementById('calc-exact-cost').textContent = `Érték: ${formatNumber(exactCostHuf, 0)} Ft`;
-            }
         }
 
         function renderPriceChart(item) {
