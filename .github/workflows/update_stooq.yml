@@ -26,7 +26,7 @@ jobs:
       - name: Repo letoltese
         uses: actions/checkout@v4
 
-      - name: BET adatok lekerese (Stooq + Yahoo Finance automata tartalek)
+      - name: BET adatok es 10 perces torteneti naplo (bet_history.json) frissitese
         run: |
           python3 - << 'EOF'
           import urllib.request
@@ -35,6 +35,8 @@ jobs:
           import time
           from datetime import datetime
           from zoneinfo import ZoneInfo
+
+          PAGES_HISTORY_URL = "https://danielgyorfi.github.io/kicsi_bet/bet_history.json"
 
           TICKERS = [
               "^bux", "eurhuf",
@@ -56,9 +58,15 @@ jobs:
               "Referer": "https://stooq.com/"
           }
 
+          now_bp = datetime.now(ZoneInfo("Europe/Budapest"))
+          today_str = now_bp.strftime("%Y-%m-%d")
+          slot_min = (now_bp.minute // 10) * 10
+          current_slot = f"{now_bp.strftime('%H')}:{slot_min:02d}"
+
           rows = ["Symbol,Date,Time,Open,High,Low,Close,Volume,Name"]
           stooq_ok = False
 
+          # 1. Kiserlet: Stooq lekerdezes 15-os csomagokban
           stooq_lines = []
           for i in range(0, len(TICKERS), 15):
               chunk = TICKERS[i:i+15]
@@ -82,6 +90,7 @@ jobs:
           else:
               print("Stooq blokkolta a GitHub IP-t vagy ures valaszt adott, atvaltas Yahoo Finance (.BD) lekerdezesre...")
 
+          # 2. Kiserlet: Yahoo Finance .BD vegpontok
           if not stooq_ok:
               YF_MAP = {
                   "^bux": "^BUX",
@@ -114,18 +123,58 @@ jobs:
                       rows.append(f"{stooq_sym},N/D,N/D,N/D,N/D,N/D,N/D,N/D,{stooq_sym}")
                   time.sleep(0.1)
 
+          # Meglevo aznapi bet_history.json betoltese az elo GitHub Pages oldalrol
+          history_data = {"date": today_str, "series": {}}
+          try:
+              req_h = urllib.request.Request(f"{PAGES_HISTORY_URL}?_t={int(time.time())}", headers={"User-Agent": HEADERS["User-Agent"]})
+              with urllib.request.urlopen(req_h, timeout=6) as resp_h:
+                  loaded_h = json.loads(resp_h.read().decode("utf-8"))
+                  if isinstance(loaded_h, dict) and loaded_h.get("date") == today_str and isinstance(loaded_h.get("series"), dict):
+                      history_data = loaded_h
+          except Exception:
+              pass
+
+          # Aktualis 10 perces arfolyamok hozzafuzese a bet_history.json-hoz
+          for line in rows[1:]:
+              cols = line.split(",")
+              if len(cols) >= 7:
+                  sym = cols[0].strip().upper()
+                  try:
+                      open_p = float(cols[3])
+                  except Exception:
+                      open_p = None
+                  try:
+                      close_p = float(cols[6])
+                  except Exception:
+                      close_p = open_p
+
+                  if close_p is not None and close_p > 0:
+                      pts = history_data["series"].setdefault(sym, [])
+                      if not any(p.get("time") == "09:00" for p in pts) and open_p and open_p > 0:
+                          pts.append({"time": "09:00", "price": open_p})
+                      if "09:00" <= current_slot <= "17:10":
+                          existing = next((p for p in pts if p.get("time") == current_slot), None)
+                          if existing:
+                              existing["price"] = close_p
+                          else:
+                              pts.append({"time": current_slot, "price": close_p})
+                      pts.sort(key=lambda x: x.get("time", ""))
+                      history_data["series"][sym] = pts[-60:]
+
+          with open("bet_history.json", "w", encoding="utf-8") as fh:
+              json.dump(history_data, fh, ensure_ascii=False)
+
           if len(rows) > 1:
-              now_bp = datetime.now(ZoneInfo("Europe/Budapest"))
-              rows.append(f"#GENERATED_AT,{now_bp.strftime('%Y-%m-%d')},{now_bp.strftime('%H:%M:%S')}")
+              rows.append(f"#GENERATED_AT,{today_str},{now_bp.strftime('%H:%M:%S')}")
               with open("bet_data.csv", "w", encoding="utf-8") as f:
                   f.write("\n".join(rows) + "\n")
-              print(f"bet_data.csv sikeresen mentve ({len(rows)-2} instrumentum).")
+              print(f"bet_data.csv es bet_history.json sikeresen mentve ({current_slot}).")
           EOF
 
       - name: GitHub Pages beallitasa
         uses: actions/configure-pages@v5
 
-      - name: Fajlok becsomagolasa a Pages-hez (index.html + friss bet_data.csv)
+      - name: Fajlok becsomagolasa a Pages-hez (index.html + bet_data.csv + bet_history.json)
         uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
