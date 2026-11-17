@@ -88,7 +88,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="text-lg font-bold tracking-tight text-white">BÉT Monitor</h1>
-                        <span class="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">ÉLŐ TERMINÁL • v16</span>
+                        <span class="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">ÉLŐ TERMINÁL • v17</span>
                     </div>
                     <p class="text-xs text-slate-400">Teljes BÉT Paletta: Blue-Chip, Mid-Cap & Xtend</p>
                 </div>
@@ -426,9 +426,9 @@
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-xs text-slate-300 font-medium flex items-center gap-1.5">
                             <i data-lucide="activity" class="w-3.5 h-3.5 text-blue-400"></i>
-                            Árfolyam profil (Nyitó → Min/Max → Utolsó + Helyi napló)
+                            Árfolyam profil (10 perces CRON napló • 09:00–17:00)
                         </span>
-                        <span id="detail-history-count" class="text-[11px] font-mono text-slate-400">OHLC profil</span>
+                        <span id="detail-history-count" class="text-[11px] font-mono text-slate-400">10p CRON profil</span>
                     </div>
                     <div class="relative h-56 w-full bg-slate-950/60 rounded-xl p-3 border border-slate-800/80">
                         <canvas id="priceChart"></canvas>
@@ -576,7 +576,7 @@
         <!-- Verziószám és GitHub Pages Deploy Állapotsor -->
         <div class="flex flex-wrap items-center justify-between gap-2 px-2 text-[11px] text-slate-500 font-mono">
             <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-emerald-400 font-bold">Verzió: v16</span>
+                <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-emerald-400 font-bold">Verzió: v17</span>
                 <span>•</span>
                 <span>Teljes BÉT Paletta: Blue-Chip, Mid-Cap & Xtend</span>
             </div>
@@ -705,13 +705,16 @@
 
         // Alkalmazás állapot (State)
         let csvUrl = './bet_data.csv';
+        let historyJsonUrl = './bet_history.json';
         let stocksList = [];        // Feldolgozott részvények listája
         let stockMap = {};          // symbol -> stockObj
         let selectedTicker = 'OTP.HU';
         let currentCategory = 'favorites'; // Mindig a Kedvencekkel nyílik meg az oldal!
         let currentViewMode = 'table'; // 'table' | 'cards'
         let favorites = ['OTP.HU', 'MOL.HU', 'RICHT.HU', 'EPDUFERR.HU'];
-        let priceHistoryLog = {};   // symbol -> [{ time, price }] (localStorage-ban épülő idősor)
+        let priceHistoryLog = {};   // symbol -> [{ date, slot, time, price }] (napi 10 perces CRON idősávok, max 60 pont)
+        let serverHistoryLoaded = false;
+        let activeTradingDate = ''; // Az aktuális kereskedési nap (pl. 2026-11-17), hogy a tegnapi pontok ne keveredjenek bele
         let isAutoRefresh = true;
         let autoRefreshTimer = null;
         let countdownSeconds = 60;  // 1 perc = 60 másodperc automatikus CSV szinkron
@@ -776,8 +779,11 @@
                     saveFavorites();
                 }
 
-                const savedHistory = localStorage.getItem('bet_history_log_v2');
-                if (savedHistory) priceHistoryLog = JSON.parse(savedHistory);
+                // v17-es tiszta, aznapi 10 perces CRON napló betöltése (nem keveri bele a tegnapi 17:00-s pontokat)
+                const savedHistory = localStorage.getItem('bet_intraday_history_v17');
+                if (savedHistory) {
+                    priceHistoryLog = JSON.parse(savedHistory);
+                }
             } catch (err) {
                 console.error('LocalStorage olvasási hiba:', err);
             }
@@ -870,8 +876,51 @@
 
         function saveHistoryLog() {
             try {
-                localStorage.setItem('bet_history_log_v2', JSON.stringify(priceHistoryLog));
+                localStorage.setItem('bet_intraday_history_v17', JSON.stringify(priceHistoryLog));
             } catch (e) {}
+        }
+
+        // Időpont kerekítése 10 perces CRON rácspontra (pl. "14:14:14" -> "14:10")
+        function toTenMinuteSlot(timeStr) {
+            if (!timeStr || typeof timeStr !== 'string') return '09:00';
+            const clean = timeStr.trim();
+            const parts = clean.split(':');
+            if (parts.length < 2) return clean.slice(0, 5);
+            const hh = parseInt(parts[0], 10);
+            const mm = parseInt(parts[1], 10);
+            if (isNaN(hh) || isNaN(mm)) return clean.slice(0, 5);
+            const flooredMin = Math.floor(mm / 10) * 10;
+            return `${String(hh).padStart(2, '0')}:${String(flooredMin).padStart(2, '0')}`;
+        }
+
+        // Szerver oldali ./bet_history.json (GitHub Actions 10 perces napló) betöltése és összefésülése
+        async function fetchServerHistoryJson() {
+            try {
+                const res = await fetch(`${historyJsonUrl}?_t=${Date.now()}`, { cache: 'no-store' });
+                if (!res.ok) return false;
+                const data = await res.json();
+                if (!data || typeof data !== 'object' || !data.series) return false;
+
+                const serverDate = data.date || activeTradingDate;
+                if (serverDate && (!activeTradingDate || serverDate >= activeTradingDate)) {
+                    activeTradingDate = serverDate;
+                }
+
+                Object.entries(data.series).forEach(([rawSym, pts]) => {
+                    const sym = SYMBOL_ALIASES[rawSym] || rawSym;
+                    if (!Array.isArray(pts)) return;
+                    pts.forEach(pt => {
+                        if (pt && pt.time && typeof pt.price === 'number') {
+                            recordPriceHistoryPoint(sym, serverDate, pt.time, pt.price);
+                        }
+                    });
+                });
+                serverHistoryLoaded = true;
+                saveHistoryLog();
+                return true;
+            } catch (e) {
+                return false;
+            }
         }
 
         /***********************************************************************
@@ -902,7 +951,10 @@
                 let csvText = null;
                 let lastModHeader = null;
 
-                // Közvetlen, gyorsítótár-mentes lekérés a saját GitHub Pages ./bet_data.csv fájlból
+                // 1. Szerveroldali 10 perces történeti napló (./bet_history.json) lekérése párhuzamosan
+                await fetchServerHistoryJson();
+
+                // 2. Közvetlen, gyorsítótár-mentes lekérés a saját GitHub Pages ./bet_data.csv fájlból
                 try {
                     const sep = csvUrl.includes('?') ? '&' : '?';
                     const targetUrl = `${csvUrl}${sep}_t=${Date.now()}`;
@@ -927,7 +979,7 @@
                         updateHeaderStatusUI();
                         renderAllUI();
                         if (isManual) {
-                            showToast(`CSV adatok frissítve (${csvFileCreatedLabel})!`, 'success');
+                            showToast(`CSV és 10 perces CRON napló frissítve (${csvFileCreatedLabel})!`, 'success');
                         }
                         return;
                     }
@@ -998,20 +1050,31 @@
             const parsedItems = [];
             const newMap = {};
             let explicitGeneratedAt = null;
+            let explicitGeneratedDate = null;
+            let explicitGeneratedTime = null;
             let latestRowDateTime = '';
+            let latestRowDateOnly = '';
+
+            // Előfeldolgozás: #GENERATED_AT kiolvasása, hogy minden részvényt a CRON futás 10 perces időlépcsőjéhez tudjunk rögzíteni
+            for (let i = 0; i < lines.length; i++) {
+                const l = lines[i];
+                if (l.startsWith('#GENERATED_AT')) {
+                    const metaCols = l.split(',');
+                    if (metaCols.length >= 3) {
+                        explicitGeneratedDate = metaCols[1].trim();
+                        explicitGeneratedTime = metaCols[2].trim();
+                        explicitGeneratedAt = `${explicitGeneratedDate} • ${explicitGeneratedTime}`;
+                    } else if (metaCols.length === 2) {
+                        explicitGeneratedAt = metaCols[1].trim();
+                    }
+                }
+            }
 
             // Sorok feldolgozása
             for (let i = 0; i < lines.length; i++) {
                 const line = lines[i];
 
-                // 1. Speciális metaadat sor ellenőrzése: #GENERATED_AT,YYYY-MM-DD,HH:MM:SS
                 if (line.startsWith('#GENERATED_AT')) {
-                    const metaCols = line.split(',');
-                    if (metaCols.length >= 3) {
-                        explicitGeneratedAt = `${metaCols[1].trim()} • ${metaCols[2].trim()}`;
-                    } else if (metaCols.length === 2) {
-                        explicitGeneratedAt = metaCols[1].trim();
-                    }
                     continue;
                 }
 
@@ -1033,6 +1096,9 @@
                     const combinedDt = `${rawRowDate} • ${cleanTime}`;
                     if (combinedDt > latestRowDateTime) {
                         latestRowDateTime = combinedDt;
+                    }
+                    if (rawRowDate > latestRowDateOnly) {
+                        latestRowDateOnly = rawRowDate;
                     }
                 }
 
@@ -1149,41 +1215,50 @@
                 parsedItems.push(item);
                 newMap[rawSymbol] = item;
 
-                // Elmentjük a pontot a helyi idősor naplóba (ha új időpont vagy ár)
-                recordPriceHistoryPoint(rawSymbol, `${item.date} ${item.time}`, price);
+                // Aktuális kereskedési nap és 10 perces CRON időpont meghatározása
+                const snapshotDate = explicitGeneratedDate || latestRowDateOnly || resolvedDate;
+                const snapshotTime = explicitGeneratedTime || resolvedTime;
+                if (snapshotDate && snapshotDate > activeTradingDate) {
+                    activeTradingDate = snapshotDate;
+                }
+
+                // 09:00-s nyitóár rögzítése az adott nap elejére, majd az aktuális CRON időlépcső rögzítése
+                recordPriceHistoryPoint(rawSymbol, snapshotDate, '09:00', open);
+                if (resolvedDate === snapshotDate && resolvedTime && resolvedTime >= '09:00:00' && resolvedTime <= '17:15:00') {
+                    recordPriceHistoryPoint(rawSymbol, snapshotDate, resolvedTime, price);
+                }
+                if (snapshotTime && snapshotTime >= '09:00:00' && snapshotTime <= '17:20:00') {
+                    recordPriceHistoryPoint(rawSymbol, snapshotDate, snapshotTime, price);
+                }
             }
 
-            // Ha a GitHub-on lévő bet_data.csv-ből még hiányozna bármelyik a 73 instrumentum közül,
-            // automatikusan kiegészítjük őket a BET_METADATA pontos BÉT kötéseivel!
+            // Ha valamelyik BÉT papír hiányozna a CSV-ből, feltöltjük a referencia adatokból, hogy mindig meglegyen mind a 73 instrumentum
+            const fallbackDay = explicitGeneratedDate || latestRowDateOnly || activeTradingDate || '2026-11-17';
             Object.entries(BET_METADATA).forEach(([sym, meta]) => {
                 if (!newMap[sym]) {
                     const price = meta.fallbackPrice ?? 0;
-                    const open  = meta.fallbackOpen ?? price;
-                    const high  = meta.fallbackHigh ?? Math.max(price, open);
-                    const low   = meta.fallbackLow ?? Math.min(price, open);
+                    const open = meta.fallbackOpen ?? price;
+                    const high = meta.fallbackHigh ?? price;
+                    const low = meta.fallbackLow ?? price;
                     const basePrice = meta.fallbackBase ?? open;
-                    const change = meta.fallbackChange ?? Math.round((price - basePrice) * 10000) / 10000;
-                    const changePercent = meta.fallbackChgPct ?? (basePrice > 0 ? (change / basePrice) * 100 : 0);
+                    const change = meta.fallbackChange ?? 0;
+                    const changePercent = meta.fallbackChgPct ?? 0;
                     const volume = meta.fallbackVol ?? 0;
-                    const turnoverValue = meta.fallbackVal ?? (volume * price);
+                    const turnoverValue = meta.fallbackVal ?? (price * volume);
+                    const rangePositionPct = high > low ? Math.max(0, Math.min(100, ((price - low) / (high - low)) * 100)) : 50;
 
-                    let rangePositionPct = 50;
-                    if (high > low) {
-                        rangePositionPct = Math.max(0, Math.min(100, ((price - low) / (high - low)) * 100));
-                    }
-
-                    const fallbackItem = {
+                    const item = {
                         symbol: sym,
                         displayTicker: meta.displayTicker || sym.replace('.HU', ''),
                         name: meta.name,
-                        stooqName: meta.name,
+                        stooqName: sym,
                         category: meta.category,
                         sector: meta.sector,
-                        currency: meta.currency || 'HUF',
+                        currency: meta.currency || (meta.isIndex ? 'pont' : 'HUF'),
                         decimals: meta.decimals,
                         isIndex: Boolean(meta.isIndex),
                         order: meta.order ?? 99,
-                        date: meta.fallbackDate || '2026-11-13',
+                        date: meta.fallbackDate || fallbackDay,
                         time: '17:00:00',
                         open,
                         high,
@@ -1196,27 +1271,30 @@
                         changePercent,
                         rangePositionPct
                     };
-                    parsedItems.push(fallbackItem);
-                    newMap[sym] = fallbackItem;
+                    parsedItems.push(item);
+                    newMap[sym] = item;
+                    recordPriceHistoryPoint(sym, fallbackDay, '09:00', open);
+                    if (explicitGeneratedTime) {
+                        recordPriceHistoryPoint(sym, fallbackDay, explicitGeneratedTime, price);
+                    }
                 }
             });
 
-            stocksList = parsedItems.sort((a, b) => a.order - b.order);
+            parsedItems.sort((a, b) => a.order - b.order);
+            stocksList = parsedItems;
             stockMap = newMap;
             saveHistoryLog();
 
-            // CSV készítési idő meghatározása 3 lépcsőben:
-            // 1. #GENERATED_AT meta-sor a CSV-ben -> 2. HTTP Last-Modified fejléc -> 3. Legfrissebb kötési dátum/idő a CSV soraiból
+            // CSV készítési időbélyeg feloldása (1. #GENERATED_AT, 2. HTTP Last-Modified fejléc, 3. Legfrissebb kötési idő)
             let resolvedCsvCreated = '--';
             if (explicitGeneratedAt) {
                 resolvedCsvCreated = explicitGeneratedAt;
             } else if (lastModifiedHeader) {
-                const parsedModDate = new Date(lastModifiedHeader);
-                if (!isNaN(parsedModDate.getTime())) {
-                    resolvedCsvCreated = formatBudapestTimestamp(parsedModDate);
+                const parsedMod = new Date(lastModifiedHeader);
+                if (!isNaN(parsedMod.getTime())) {
+                    resolvedCsvCreated = formatBudapestTimestamp(parsedMod);
                 }
-            }
-            if (resolvedCsvCreated === '--' && latestRowDateTime) {
+            } else if (latestRowDateTime) {
                 resolvedCsvCreated = latestRowDateTime;
             }
             updateCsvCreatedUI(resolvedCsvCreated);
@@ -1224,24 +1302,89 @@
             // Böngésző szinkron időbélyeg
             const now = new Date();
             const timeFormatted = now.toLocaleTimeString('hu-HU');
-            document.getElementById('last-updated-time').textContent = timeFormatted;
+            const lastUpdEl = document.getElementById('last-updated-time');
+            if (lastUpdEl) lastUpdEl.textContent = timeFormatted;
             const footerSyncEl = document.getElementById('footer-sync-time');
             if (footerSyncEl) footerSyncEl.textContent = timeFormatted;
 
             return stocksList.length;
         }
 
-        function recordPriceHistoryPoint(symbol, timestampLabel, price) {
-            if (!price || isNaN(price)) return;
+        function recordPriceHistoryPoint(symbol, dateStr, timeStr, price) {
+            if (!price || isNaN(price) || !dateStr || !timeStr) return;
+            const slot = toTenMinuteSlot(timeStr); // pl. "14:10"
+            if (slot < '09:00' || slot > '17:20') return;
+
             if (!priceHistoryLog[symbol]) {
                 priceHistoryLog[symbol] = [];
             }
+
+            // Csak az aktuális (legfrissebb) kereskedési nap pontjait tartjuk meg, hogy a tegnapi 17:00 ne keveredjen a mai 10:10 elé
+            const targetDate = activeTradingDate && activeTradingDate > dateStr ? activeTradingDate : dateStr;
+            priceHistoryLog[symbol] = priceHistoryLog[symbol].filter(pt => pt.date === targetDate);
+            if (dateStr < targetDate) return;
+
             const arr = priceHistoryLog[symbol];
-            const last = arr[arr.length - 1];
-            if (!last || last.time !== timestampLabel || last.price !== price) {
-                arr.push({ time: timestampLabel, price });
-                if (arr.length > 35) arr.shift();
+            const existingIdx = arr.findIndex(pt => pt.slot === slot);
+            if (existingIdx > -1) {
+                arr[existingIdx].price = price;
+                arr[existingIdx].time = slot;
+            } else {
+                arr.push({ date: dateStr, slot, time: slot, price });
+                arr.sort((a, b) => a.slot.localeCompare(b.slot));
+                // Legfeljebb 60 darab 10 perces pont (lefedi a teljes 09:00–17:00 tőzsdei napot)
+                if (arr.length > 60) arr.shift();
             }
+        }
+
+        // Folyamatos 10 perces (09:00, 09:10, 09:20 ... aktuális CRON idő) sorozat előállítása a grafikonhoz
+        function buildTenMinuteChartSeries(item) {
+            const rawPts = (priceHistoryLog[item.symbol] || [])
+                .filter(p => !activeTradingDate || p.date === activeTradingDate)
+                .sort((a, b) => a.slot.localeCompare(b.slot));
+
+            if (rawPts.length === 0) {
+                const isUp = item.price >= item.open;
+                return {
+                    labels: ['09:00', '11:30', '14:00', toTenMinuteSlot(item.time || '17:00')],
+                    dataPts: [item.open, isUp ? item.low : item.high, isUp ? item.high : item.low, item.price],
+                    badgeText: 'Napi 10p CRON alapprofil'
+                };
+            }
+
+            // Meghatározzuk a napi utolsó ismert 10 perces idősávot (minimum az utolsó rögzített pont, maximum 17:00)
+            const lastSlot = rawPts[rawPts.length - 1].slot;
+            const [endH, endM] = lastSlot.split(':').map(Number);
+            const endTotalMins = Math.min(17 * 60, Math.max(9 * 60 + 10, endH * 60 + endM));
+
+            const slotMap = {};
+            rawPts.forEach(p => { slotMap[p.slot] = p.price; });
+
+            const labels = [];
+            const dataPts = [];
+            let currentPrice = slotMap['09:00'] ?? item.open ?? item.price;
+
+            for (let m = 9 * 60; m <= endTotalMins; m += 10) {
+                const hh = String(Math.floor(m / 60)).padStart(2, '0');
+                const mm = String(m % 60).padStart(2, '0');
+                const slotKey = `${hh}:${mm}`;
+                if (slotMap[slotKey] !== undefined) {
+                    currentPrice = slotMap[slotKey];
+                }
+                labels.push(slotKey);
+                dataPts.push(currentPrice);
+            }
+
+            // A legutolsó pont biztosan az aktuális élő CSV ár legyen
+            if (dataPts.length > 0) {
+                dataPts[dataPts.length - 1] = item.price;
+            }
+
+            return {
+                labels,
+                dataPts,
+                badgeText: `${labels.length} db 10 perces idősáv (${labels[0]}–${labels[labels.length - 1]})`
+            };
         }
 
         /***********************************************************************
@@ -1620,29 +1763,13 @@
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
 
-            // Napon belüli OHLC profil + ha van több elmentett helyi CSV frissítésünk
-            const savedPoints = priceHistoryLog[item.symbol] || [];
-            let labels = [];
-            let dataPts = [];
+            // 10 perces CRON időlépcsős (09:00, 09:10, 09:20...) árfolyam-idősor felépítése
+            const series = buildTenMinuteChartSeries(item);
+            const labels = series.labels;
+            const dataPts = series.dataPts;
+            document.getElementById('detail-history-count').textContent = series.badgeText;
 
-            if (savedPoints.length >= 4) {
-                labels = savedPoints.map(p => p.time.split(' ')[1] || p.time);
-                dataPts = savedPoints.map(p => p.price);
-                document.getElementById('detail-history-count').textContent = `${savedPoints.length} mentett CSV időpont`;
-            } else {
-                // OHLC 4-pontos profil a Stooq CSV-ből (Nyitó -> Napi Min/Max -> Utolsó)
-                const isUp = item.price >= item.open;
-                labels = ['09:00 Nyitó', isUp ? 'Napi Minimum' : 'Napi Maximum', isUp ? 'Napi Maximum' : 'Napi Minimum', `${item.time.slice(0,5)} Utolsó`];
-                dataPts = [
-                    item.open,
-                    isUp ? item.low : item.high,
-                    isUp ? item.high : item.low,
-                    item.price
-                ];
-                document.getElementById('detail-history-count').textContent = 'Stooq CSV Napi OHLC Profil';
-            }
-
-            const isPositive = item.price >= item.open;
+            const isPositive = item.price >= (item.basePrice || item.open);
             const strokeColor = isPositive ? '#10b981' : '#f43f5e';
             const gradient = ctx.createLinearGradient(0, 0, 0, 220);
             gradient.addColorStop(0, isPositive ? 'rgba(16, 185, 129, 0.32)' : 'rgba(244, 63, 94, 0.32)');
@@ -1663,10 +1790,11 @@
                         data: dataPts,
                         borderColor: strokeColor,
                         backgroundColor: gradient,
-                        borderWidth: 2.5,
+                        borderWidth: 2.2,
                         fill: true,
-                        tension: 0.28,
-                        pointRadius: 4,
+                        tension: 0.22,
+                        pointRadius: labels.length > 25 ? 2.5 : 3.5,
+                        pointHoverRadius: 5,
                         pointBackgroundColor: strokeColor
                     }]
                 },
@@ -1792,7 +1920,9 @@
 
             if (dataSourceMode === 'github_csv') {
                 dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse';
-                text.textContent = `ÉLES CSV (${csvUrl})`;
+                text.textContent = serverHistoryLoaded
+                    ? `ÉLES CSV + 10P CRON NAPLÓ (${csvUrl})`
+                    : `ÉLES CSV (${csvUrl})`;
                 text.className = 'text-xs font-semibold text-emerald-400';
             } else if (dataSourceMode === 'manual_csv') {
                 dot.className = 'w-2.5 h-2.5 rounded-full bg-blue-400';
