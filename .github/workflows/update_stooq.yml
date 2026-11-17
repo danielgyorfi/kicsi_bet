@@ -6,6 +6,11 @@ on:
   schedule:
     - cron: '*/15 * * * *'
   workflow_dispatch:
+    inputs:
+      reset_history:
+        description: 'Chart torteneti naplo (bet_history.json) nullazasa most'
+        required: false
+        default: 'false'
 
 permissions:
   contents: read
@@ -27,8 +32,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: BET adatok es 10 perces torteneti naplo (bet_history.json) frissitese
+        env:
+          RESET_HISTORY: ${{ github.event.inputs.reset_history || 'false' }}
         run: |
           python3 - << 'EOF'
+          import os
           import urllib.request
           import urllib.parse
           import json
@@ -37,6 +45,7 @@ jobs:
           from zoneinfo import ZoneInfo
 
           PAGES_HISTORY_URL = "https://danielgyorfi.github.io/kicsi_bet/bet_history.json"
+          reset_flag = os.environ.get("RESET_HISTORY", "false").lower() == "true"
 
           TICKERS = [
               "^bux", "eurhuf",
@@ -123,16 +132,17 @@ jobs:
                       rows.append(f"{stooq_sym},N/D,N/D,N/D,N/D,N/D,N/D,N/D,{stooq_sym}")
                   time.sleep(0.1)
 
-          # Meglevo aznapi bet_history.json betoltese az elo GitHub Pages oldalrol
+          # Meglevo aznapi bet_history.json betoltese az elo GitHub Pages oldalrol (ha nem kertunk nullazast)
           history_data = {"date": today_str, "series": {}}
-          try:
-              req_h = urllib.request.Request(f"{PAGES_HISTORY_URL}?_t={int(time.time())}", headers={"User-Agent": HEADERS["User-Agent"]})
-              with urllib.request.urlopen(req_h, timeout=6) as resp_h:
-                  loaded_h = json.loads(resp_h.read().decode("utf-8"))
-                  if isinstance(loaded_h, dict) and loaded_h.get("date") == today_str and isinstance(loaded_h.get("series"), dict):
-                      history_data = loaded_h
-          except Exception:
-              pass
+          if not reset_flag:
+              try:
+                  req_h = urllib.request.Request(f"{PAGES_HISTORY_URL}?_t={int(time.time())}", headers={"User-Agent": HEADERS["User-Agent"]})
+                  with urllib.request.urlopen(req_h, timeout=6) as resp_h:
+                      loaded_h = json.loads(resp_h.read().decode("utf-8"))
+                      if isinstance(loaded_h, dict) and loaded_h.get("date") == today_str and isinstance(loaded_h.get("series"), dict):
+                          history_data = loaded_h
+              except Exception:
+                  pass
 
           # Aktualis 10 perces arfolyamok hozzafuzese a bet_history.json-hoz
           for line in rows[1:]:
@@ -150,8 +160,6 @@ jobs:
 
                   if close_p is not None and close_p > 0:
                       pts = history_data["series"].setdefault(sym, [])
-                      if not any(p.get("time") == "09:00" for p in pts) and open_p and open_p > 0:
-                          pts.append({"time": "09:00", "price": open_p})
                       if "09:00" <= current_slot <= "17:10":
                           existing = next((p for p in pts if p.get("time") == current_slot), None)
                           if existing:
