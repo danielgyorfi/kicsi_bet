@@ -88,7 +88,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="text-lg font-bold tracking-tight text-white">BÉT Monitor</h1>
-                        <span class="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">ÉLŐ TERMINÁL • v19</span>
+                        <span class="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">ÉLŐ TERMINÁL • v20</span>
                     </div>
                     <p class="text-xs text-slate-400">Teljes BÉT Paletta: Blue-Chip, Mid-Cap & Xtend</p>
                 </div>
@@ -428,13 +428,7 @@
                             <i data-lucide="activity" class="w-3.5 h-3.5 text-blue-400"></i>
                             Árfolyam profil (10 perces CRON napló • 09:00–17:00)
                         </span>
-                        <div class="flex items-center gap-2">
-                            <span id="detail-history-count" class="text-[11px] font-mono text-slate-400">10p CRON profil</span>
-                            <button onclick="resetChartHistory()" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 transition" title="Minden eddigi chart-adatpont törlése és tiszta adatgyűjtés indítása mostantól">
-                                <i data-lucide="trash-2" class="w-3 h-3"></i>
-                                <span>Chart törlése / Újrakezdés</span>
-                            </button>
-                        </div>
+                        <span id="detail-history-count" class="text-[11px] font-mono text-slate-400">10p CRON profil</span>
                     </div>
                     <div class="relative h-56 w-full bg-slate-950/60 rounded-xl p-3 border border-slate-800/80">
                         <canvas id="priceChart"></canvas>
@@ -534,8 +528,9 @@
                                 <span class="text-[11px] font-semibold text-slate-200 block">Chart Adatgyűjtés Nullázása</span>
                                 <span id="tech-reset-status" class="text-[10px] text-slate-400">Helyi és szerveroldali (bet_history.json) előzmények szűrése</span>
                             </div>
-                            <button onclick="resetChartHistory()" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 transition">
-                                Chart Reset
+                            <button onclick="resetChartHistory()" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 transition" title="Minden eddigi chart-adatpont törlése és tiszta adatgyűjtés indítása mostantól">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                <span>Chart törlése / Újrakezdés</span>
                             </button>
                         </div>
                     </div>
@@ -582,7 +577,7 @@
         <!-- Verziószám és GitHub Pages Deploy Állapotsor -->
         <div class="flex flex-wrap items-center justify-between gap-2 px-2 text-[11px] text-slate-500 font-mono">
             <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-emerald-400 font-bold">Verzió: v19</span>
+                <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-emerald-400 font-bold">Verzió: v20</span>
                 <span>•</span>
                 <span>Teljes BÉT Paletta: Blue-Chip, Mid-Cap & Xtend</span>
             </div>
