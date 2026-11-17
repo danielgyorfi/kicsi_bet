@@ -88,7 +88,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="text-lg font-bold tracking-tight text-white">BÉT Monitor</h1>
-                        <span class="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">ÉLŐ TERMINÁL • v17</span>
+                        <span class="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">ÉLŐ TERMINÁL • v19</span>
                     </div>
                     <p class="text-xs text-slate-400">Teljes BÉT Paletta: Blue-Chip, Mid-Cap & Xtend</p>
                 </div>
@@ -423,12 +423,18 @@
 
                 <!-- Napon belüli / Mentett Árfolyam Grafikon (Chart.js) -->
                 <div>
-                    <div class="flex items-center justify-between mb-2">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
                         <span class="text-xs text-slate-300 font-medium flex items-center gap-1.5">
                             <i data-lucide="activity" class="w-3.5 h-3.5 text-blue-400"></i>
                             Árfolyam profil (10 perces CRON napló • 09:00–17:00)
                         </span>
-                        <span id="detail-history-count" class="text-[11px] font-mono text-slate-400">10p CRON profil</span>
+                        <div class="flex items-center gap-2">
+                            <span id="detail-history-count" class="text-[11px] font-mono text-slate-400">10p CRON profil</span>
+                            <button onclick="resetChartHistory()" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 transition" title="Minden eddigi chart-adatpont törlése és tiszta adatgyűjtés indítása mostantól">
+                                <i data-lucide="trash-2" class="w-3 h-3"></i>
+                                <span>Chart törlése / Újrakezdés</span>
+                            </button>
+                        </div>
                     </div>
                     <div class="relative h-56 w-full bg-slate-950/60 rounded-xl p-3 border border-slate-800/80">
                         <canvas id="priceChart"></canvas>
@@ -525,12 +531,12 @@
                         </div>
                         <div class="flex items-center justify-between bg-slate-950/80 border border-slate-800 px-3 py-2 rounded-lg">
                             <div>
-                                <span class="text-[11px] font-semibold text-slate-200 block">Háttérfrissítés motor (0 CORS hiba)</span>
-                                <span class="text-[10px] text-slate-400">cron-job.org (10p) ➔ GitHub Actions ➔ ./bet_data.csv</span>
+                                <span class="text-[11px] font-semibold text-slate-200 block">Chart Adatgyűjtés Nullázása</span>
+                                <span id="tech-reset-status" class="text-[10px] text-slate-400">Helyi és szerveroldali (bet_history.json) előzmények szűrése</span>
                             </div>
-                            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                                AKTÍV
-                            </span>
+                            <button onclick="resetChartHistory()" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 transition">
+                                Chart Reset
+                            </button>
                         </div>
                     </div>
                     <div class="pt-3 border-t border-slate-800 flex items-center justify-between">
@@ -576,7 +582,7 @@
         <!-- Verziószám és GitHub Pages Deploy Állapotsor -->
         <div class="flex flex-wrap items-center justify-between gap-2 px-2 text-[11px] text-slate-500 font-mono">
             <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-emerald-400 font-bold">Verzió: v17</span>
+                <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-emerald-400 font-bold">Verzió: v19</span>
                 <span>•</span>
                 <span>Teljes BÉT Paletta: Blue-Chip, Mid-Cap & Xtend</span>
             </div>
@@ -713,6 +719,7 @@
         let currentViewMode = 'table'; // 'table' | 'cards'
         let favorites = ['OTP.HU', 'MOL.HU', 'RICHT.HU', 'EPDUFERR.HU'];
         let priceHistoryLog = {};   // symbol -> [{ date, slot, time, price }] (napi 10 perces CRON idősávok, max 60 pont)
+        let chartResetMarker = null; // { date: 'YYYY-MM-DD', slot: 'HH:MM', fullTime: 'HH:MM:SS' } - a manuális törlés előtti pontok kiszűrésére
         let serverHistoryLoaded = false;
         let activeTradingDate = ''; // Az aktuális kereskedési nap (pl. 2026-11-17), hogy a tegnapi pontok ne keveredjenek bele
         let isAutoRefresh = true;
@@ -779,105 +786,175 @@
                     saveFavorites();
                 }
 
-                // v17-es tiszta, aznapi 10 perces CRON napló betöltése (nem keveri bele a tegnapi 17:00-s pontokat)
-                const savedHistory = localStorage.getItem('bet_intraday_history_v17');
+                // Régi, elavult localStorage kulcsok takarítása, hogy ne okozzanak szellemadatokat
+                localStorage.removeItem('bet_price_history');
+                localStorage.removeItem('bet_intraday_history');
+                localStorage.removeItem('bet_intraday_history_v17');
+
+                // Manuális Chart Reset időbélyeg betöltése (ha a felhasználó ma már nullázta a grafikont)
+                const savedResetMarker = localStorage.getItem('bet_chart_reset_marker_v18');
+                if (savedResetMarker) {
+                    chartResetMarker = JSON.parse(savedResetMarker);
+                }
+
+                // v18-as tiszta, aznapi 10 perces CRON napló betöltése
+                const savedHistory = localStorage.getItem('bet_intraday_history_v18');
                 if (savedHistory) {
                     priceHistoryLog = JSON.parse(savedHistory);
                 }
+                updateResetStatusUI();
             } catch (err) {
                 console.error('LocalStorage olvasási hiba:', err);
             }
         }
 
-        function updateEurRateUI() {
-            const formattedRate = formatNumber(EUR_HUF_RATE, 2) + ' Ft';
-            const eurInput = document.getElementById('custom-eur-rate');
-            if (eurInput) eurInput.value = EUR_HUF_RATE.toFixed(2);
-            const eurFooter = document.getElementById('footer-eur-rate');
-            if (eurFooter) eurFooter.textContent = formattedRate;
-            const kpiEur = document.getElementById('kpi-eur-huf');
-            if (kpiEur) kpiEur.textContent = formattedRate;
-            const kpiSource = document.getElementById('kpi-eur-source');
-            if (kpiSource) kpiSource.textContent = `${eurRateSourceLabel} • 4 EUR részvényhez`;
+        function saveHistoryLog() {
+            try {
+                localStorage.setItem('bet_intraday_history_v18', JSON.stringify(priceHistoryLog));
+            } catch (e) {}
         }
 
-        async function fetchLiveEurHufRate(showToastMsg = false) {
+        function saveFavorites() {
             try {
-                // 1. Elsődleges ingyenes, CORS-engedélyezett deviza API
-                const res = await fetch('https://open.er-api.com/v6/latest/EUR');
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data && data.rates && data.rates.HUF) {
-                        EUR_HUF_RATE = Math.round(data.rates.HUF * 100) / 100;
-                        eurRateSourceLabel = 'Élő deviza API';
-                        updateEurRateUI();
-                        if (showToastMsg) {
-                            showToast(`Élő EUR/HUF árfolyam frissítve: ${formatNumber(EUR_HUF_RATE, 2)} Ft`, 'success');
-                        }
-                        return;
-                    }
-                }
-            } catch (e) {
-                // Csendes fallback a Frankfurter API-ra
-            }
-
-            try {
-                const res2 = await fetch('https://api.frankfurter.app/latest?from=EUR&to=HUF');
-                if (res2.ok) {
-                    const data2 = await res2.json();
-                    if (data2 && data2.rates && data2.rates.HUF) {
-                        EUR_HUF_RATE = Math.round(data2.rates.HUF * 100) / 100;
-                        eurRateSourceLabel = 'Frankfurter EKB API';
-                        updateEurRateUI();
-                        if (showToastMsg) {
-                            showToast(`EKB EUR/HUF árfolyam frissítve: ${formatNumber(EUR_HUF_RATE, 2)} Ft`, 'success');
-                        }
-                    }
-                }
-            } catch (e2) {
-                if (showToastMsg) {
-                    showToast(`Alapértelmezett EUR/HUF árfolyam aktív: ${formatNumber(EUR_HUF_RATE, 2)} Ft`, 'info');
-                }
-            }
-        }
-
-        function saveEurRate() {
-            const val = parseFloat(document.getElementById('custom-eur-rate')?.value);
-            if (!isNaN(val) && val > 100) {
-                EUR_HUF_RATE = val;
-                eurRateSourceLabel = 'Kézi beállítás';
-                localStorage.setItem('bet_eur_rate_v7', String(EUR_HUF_RATE));
-                updateEurRateUI();
-                renderAllUI();
-                showToast(`EUR/HUF árfolyam beállítva: ${formatNumber(EUR_HUF_RATE, 2)} Ft`, 'success');
-            } else {
-                showToast('Kérlek adj meg érvényes EUR/HUF árfolyamot!', 'warning');
-            }
+                localStorage.setItem('bet_favorites_v2', JSON.stringify(favorites));
+            } catch (e) {}
         }
 
         function getDecimalsForItem(item) {
             if (!item) return 0;
             if (typeof item.decimals === 'number') return item.decimals;
             if (item.isIndex) return 2;
-            // Ha van törtrész (pl. 7.18, 5.55, 1.38, 9.1, 167.5)
-            const checkVals = [item.price, item.open, item.change];
-            for (const v of checkVals) {
-                if (typeof v === 'number' && !Number.isInteger(v)) {
-                    const s = v.toFixed(2);
-                    return s.endsWith('0') ? 1 : 2;
-                }
-            }
+            if (item.currency === 'EUR') return 2;
+            if (item.price > 0 && item.price < 50 && !Number.isInteger(item.price)) return 2;
             return 0;
         }
 
-        function saveFavorites() {
-            localStorage.setItem('bet_favorites_v2', JSON.stringify(favorites));
+        function updateEurRateUI() {
+            const formattedRate = `${formatNumber(EUR_HUF_RATE, 2)} Ft`;
+            const kpiEl = document.getElementById('kpi-eur-huf');
+            if (kpiEl) kpiEl.textContent = formattedRate;
+
+            const footerEl = document.getElementById('footer-eur-rate');
+            if (footerEl) footerEl.textContent = formattedRate;
+
+            const inputEl = document.getElementById('custom-eur-rate');
+            if (inputEl && document.activeElement !== inputEl) {
+                inputEl.value = EUR_HUF_RATE.toFixed(2);
+            }
+
+            const srcEl = document.getElementById('kpi-eur-source');
+            if (srcEl) {
+                srcEl.textContent = `${eurRateSourceLabel} • GSPARK, SPLUS`;
+            }
         }
 
-        function saveHistoryLog() {
+        function saveEurRate() {
+            const inputEl = document.getElementById('custom-eur-rate');
+            if (!inputEl) return;
+            const val = parseFloat(inputEl.value);
+            if (!isNaN(val) && val > 200 && val < 800) {
+                EUR_HUF_RATE = Math.round(val * 100) / 100;
+                eurRateSourceLabel = 'Kézi beállítás';
+                try {
+                    localStorage.setItem('bet_eur_rate_v7', String(EUR_HUF_RATE));
+                } catch (e) {}
+                updateEurRateUI();
+                renderMarketKpiBar();
+                showToast(`EUR/HUF árfolyam frissítve: ${formatNumber(EUR_HUF_RATE, 2)} Ft`, 'success');
+            } else {
+                showToast('Kérlek adj meg érvényes EUR/HUF árfolyamot (200–800 Ft között)!', 'warning');
+            }
+        }
+
+        async function fetchLiveEurHufRate(isManual = false) {
             try {
-                localStorage.setItem('bet_intraday_history_v17', JSON.stringify(priceHistoryLog));
+                const res = await fetch('https://open.er-api.com/v6/latest/EUR', { cache: 'no-store' });
+                if (res.ok) {
+                    const data = await res.json();
+                    const huf = data?.rates?.HUF;
+                    if (typeof huf === 'number' && huf > 200) {
+                        EUR_HUF_RATE = Math.round(huf * 100) / 100;
+                        eurRateSourceLabel = 'Élő FX API';
+                        try {
+                            localStorage.setItem('bet_eur_rate_v7', String(EUR_HUF_RATE));
+                        } catch (e) {}
+                        updateEurRateUI();
+                        renderMarketKpiBar();
+                        if (isManual) {
+                            showToast(`Élő EUR/HUF árfolyam frissítve: ${formatNumber(EUR_HUF_RATE, 2)} Ft`, 'success');
+                        }
+                        return true;
+                    }
+                }
+            } catch (e) {
+                // Csendes fallback a legutóbbi ismert vagy Stooq CSV-ből olvasott EUR/HUF értékre
+            }
+            updateEurRateUI();
+            if (isManual) {
+                showToast(`Stooq / Mentett EUR/HUF árfolyam aktív: ${formatNumber(EUR_HUF_RATE, 2)} Ft`, 'info');
+            }
+            return false;
+        }
+
+        function updateResetStatusUI() {
+            const el = document.getElementById('tech-reset-status');
+            if (!el) return;
+            if (chartResetMarker && chartResetMarker.date) {
+                el.textContent = `Utolsó nullázás: ${chartResetMarker.date} • ${chartResetMarker.fullTime || chartResetMarker.slot} (korábbi pontok kiszűrve)`;
+                el.className = 'text-[10px] text-emerald-400 font-mono';
+            } else {
+                el.textContent = 'Helyi és szerveroldali (bet_history.json) előzmények szűrése';
+                el.className = 'text-[10px] text-slate-400';
+            }
+        }
+
+        // Chart előzmények teljes törlése és friss adatgyűjtés indítása az aktuális időponttól
+        function resetChartHistory() {
+            try {
+                localStorage.removeItem('bet_price_history');
+                localStorage.removeItem('bet_intraday_history');
+                localStorage.removeItem('bet_intraday_history_v17');
+                localStorage.removeItem('bet_intraday_history_v18');
             } catch (e) {}
+
+            priceHistoryLog = {};
+
+            // Aktuális budapesti dátum és 10 perces idősáv meghatározása
+            const now = new Date();
+            const bpStr = formatBudapestTimestamp(now); // "YYYY-MM-DD • HH:MM:SS"
+            const parts = bpStr.split('•').map(s => s.trim());
+            const currentDate = activeTradingDate || parts[0] || '2026-11-17';
+            const currentFullTime = parts[1] || '09:00:00';
+            const currentSlot = toTenMinuteSlot(currentFullTime);
+            const boundedSlot = currentSlot > '17:10' ? '17:00' : (currentSlot < '09:00' ? '09:00' : currentSlot);
+
+            chartResetMarker = {
+                date: currentDate,
+                slot: boundedSlot,
+                fullTime: currentFullTime
+            };
+
+            try {
+                localStorage.setItem('bet_chart_reset_marker_v18', JSON.stringify(chartResetMarker));
+            } catch (e) {}
+
+            // Azonnali első tiszta adatpont rögzítése minden instrumentumhoz az aktuális árfolyammal
+            stocksList.forEach(item => {
+                if (item && item.price > 0) {
+                    priceHistoryLog[item.symbol] = [{
+                        date: currentDate,
+                        slot: boundedSlot,
+                        time: boundedSlot,
+                        price: item.price
+                    }];
+                }
+            });
+
+            saveHistoryLog();
+            updateResetStatusUI();
+            renderDetailPanel();
+            lucide.createIcons();
+            showToast(`Chart előzmények törölve! Friss adatgyűjtés elindítva (${boundedSlot}-tól).`, 'success');
         }
 
         // Időpont kerekítése 10 perces CRON rácspontra (pl. "14:14:14" -> "14:10")
@@ -1222,8 +1299,14 @@
                     activeTradingDate = snapshotDate;
                 }
 
-                // 09:00-s nyitóár rögzítése az adott nap elejére, majd az aktuális CRON időlépcső rögzítése
-                recordPriceHistoryPoint(rawSymbol, snapshotDate, '09:00', open);
+                // Csak akkor rögzítünk 09:00-s nyitóárat, ha a felhasználó nem nullázta a chartot későbbi időpontban,
+                // ÉS a nyitóár nem tér el irreálisan (>15%) az aktuális ártól (visszamaradt Stooq hiba ellen)
+                const isResetActiveToday = chartResetMarker && chartResetMarker.date === snapshotDate;
+                const isOpenReasonable = open > 0 && price > 0 && (Math.abs(open - price) / price) <= 0.15;
+
+                if (!isResetActiveToday && isOpenReasonable) {
+                    recordPriceHistoryPoint(rawSymbol, snapshotDate, '09:00', open);
+                }
                 if (resolvedDate === snapshotDate && resolvedTime && resolvedTime >= '09:00:00' && resolvedTime <= '17:15:00') {
                     recordPriceHistoryPoint(rawSymbol, snapshotDate, resolvedTime, price);
                 }
@@ -1273,7 +1356,10 @@
                     };
                     parsedItems.push(item);
                     newMap[sym] = item;
-                    recordPriceHistoryPoint(sym, fallbackDay, '09:00', open);
+                    const isResetToday = chartResetMarker && chartResetMarker.date === fallbackDay;
+                    if (!isResetToday) {
+                        recordPriceHistoryPoint(sym, fallbackDay, '09:00', open);
+                    }
                     if (explicitGeneratedTime) {
                         recordPriceHistoryPoint(sym, fallbackDay, explicitGeneratedTime, price);
                     }
@@ -1315,6 +1401,11 @@
             const slot = toTenMinuteSlot(timeStr); // pl. "14:10"
             if (slot < '09:00' || slot > '17:20') return;
 
+            // Ha a felhasználó ma megnyomta a "Chart törlése / Újrakezdés" gombot, a törlés előtti (pl. bet_history.json-ból érkező) pontokat eldobjuk
+            if (chartResetMarker && chartResetMarker.date === dateStr && slot < chartResetMarker.slot) {
+                return;
+            }
+
             if (!priceHistoryLog[symbol]) {
                 priceHistoryLog[symbol] = [];
             }
@@ -1337,34 +1428,52 @@
             }
         }
 
-        // Folyamatos 10 perces (09:00, 09:10, 09:20 ... aktuális CRON idő) sorozat előállítása a grafikonhoz
+        // Folyamatos 10 perces (első érvényes ponttól az aktuális CRON időig) sorozat előállítása mesterséges tüskék nélkül
         function buildTenMinuteChartSeries(item) {
             const rawPts = (priceHistoryLog[item.symbol] || [])
-                .filter(p => !activeTradingDate || p.date === activeTradingDate)
+                .filter(p => {
+                    if (activeTradingDate && p.date !== activeTradingDate) return false;
+                    if (chartResetMarker && chartResetMarker.date === p.date && p.slot < chartResetMarker.slot) return false;
+                    return true;
+                })
                 .sort((a, b) => a.slot.localeCompare(b.slot));
 
             if (rawPts.length === 0) {
-                const isUp = item.price >= item.open;
+                const nowSlot = toTenMinuteSlot(item.time || '17:00');
                 return {
-                    labels: ['09:00', '11:30', '14:00', toTenMinuteSlot(item.time || '17:00')],
-                    dataPts: [item.open, isUp ? item.low : item.high, isUp ? item.high : item.low, item.price],
-                    badgeText: 'Napi 10p CRON alapprofil'
+                    labels: [nowSlot, 'Most'],
+                    dataPts: [item.price, item.price],
+                    badgeText: '1 mentett pont (Friss gyűjtés)'
                 };
             }
 
-            // Meghatározzuk a napi utolsó ismert 10 perces idősávot (minimum az utolsó rögzített pont, maximum 17:00)
+            // Ha csak 1 pontunk van (pl. közvetlenül a Chart Reset után), tisztán ezt az 1 élő árszintet rajzoljuk ki ugrálás nélkül
+            if (rawPts.length === 1) {
+                const onlyPt = rawPts[0];
+                return {
+                    labels: [onlyPt.slot, 'Élő'],
+                    dataPts: [onlyPt.price, item.price],
+                    badgeText: `Friss gyűjtés (${onlyPt.slot}-tól)`
+                };
+            }
+
+            // Meghatározzuk az első és az utolsó valódi rögzített 10 perces idősávot
+            const firstSlot = rawPts[0].slot;
             const lastSlot = rawPts[rawPts.length - 1].slot;
+            const [startH, startM] = firstSlot.split(':').map(Number);
             const [endH, endM] = lastSlot.split(':').map(Number);
-            const endTotalMins = Math.min(17 * 60, Math.max(9 * 60 + 10, endH * 60 + endM));
+
+            const startTotalMins = Math.max(9 * 60, startH * 60 + startM);
+            const endTotalMins = Math.min(17 * 60 + 10, Math.max(startTotalMins, endH * 60 + endM));
 
             const slotMap = {};
             rawPts.forEach(p => { slotMap[p.slot] = p.price; });
 
             const labels = [];
             const dataPts = [];
-            let currentPrice = slotMap['09:00'] ?? item.open ?? item.price;
+            let currentPrice = rawPts[0].price;
 
-            for (let m = 9 * 60; m <= endTotalMins; m += 10) {
+            for (let m = startTotalMins; m <= endTotalMins; m += 10) {
                 const hh = String(Math.floor(m / 60)).padStart(2, '0');
                 const mm = String(m % 60).padStart(2, '0');
                 const slotKey = `${hh}:${mm}`;
@@ -1383,7 +1492,7 @@
             return {
                 labels,
                 dataPts,
-                badgeText: `${labels.length} db 10 perces idősáv (${labels[0]}–${labels[labels.length - 1]})`
+                badgeText: `${labels.length} db 10p sáv (${labels[0]}–${labels[labels.length - 1]})`
             };
         }
 
